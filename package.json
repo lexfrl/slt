@@ -1,22 +1,25 @@
 {
   "name": "slt",
   "version": "0.0.1",
-  "description": "",
+  "description": "State under control",
   "main": "index.js",
   "scripts": {
     "test": "jest",
     "test:watch": "nodemon -w __tests__ -w ./src -e js,jsx -x npm test"
   },
   "author": "Alexey Frolov <frol.rage@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "babel-jest": "^5.2.0",
     "jest-cli": "^0.4.5"
   },
   "dependencies": {
     "bluebird": "^2.9.26",
-    "immutable": "^3.7.3",
-    "lodash.get": "^3.7.0"
+    "immutable": "^3.7.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:AlexeyFrolov/slt.git"
   },
   "jest": {
     "testFileExtensions": [

@@ -1,4 +1,3 @@
-import get from "lodash.get";
 import { fromJS, is, Map, List} from "immutable";
 
 function isFunction(v) {
