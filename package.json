@@ -1,7 +1,7 @@
 {
   "name": "slt",
   "version": "0.0.1",
-  "description": "State under control",
+  "description": "Take care of your state",
   "main": "index.js",
   "scripts": {
     "test": "jest",
