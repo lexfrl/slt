@@ -1,1 +1,1 @@
-module.exports = require('./lib/solvr');
+module.exports = require('./lib/slots');
