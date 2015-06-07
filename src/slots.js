@@ -6,26 +6,21 @@ function isFunction(v) {
 }
 
 class Slots {
-
-    rules;
-
-    state;
-
-    promises;
-
-    onChangeListeners;
-
-    onPromisesAreMadeListeners;
-
-    onPromiseErrorListeners;
-
-    constructor(rules = {}, state = {}, callback = () => {}) {
+    constructor(rules = {}, state = {}) {
         this.rules =
             Slots.validateRules(
                 Slots.normalizeRules(
                     fromJS(rules)));
 
         this.state = fromJS(state);
+        this.promises = [];
+        this.onChangeListeners = [];
+        this.onPromisesAreMadeListeners = [];
+        this.onPromiseErrorListeners = [];
+    }
+
+    reset() {
+        this.state = fromJS({});
         this.promises = [];
         this.onChangeListeners = [];
         this.onPromisesAreMadeListeners = [];
@@ -53,7 +48,6 @@ class Slots {
                 .finally(() => {
                 });
         } else {
-
             let i = path.length;
             let v = value;
             while (i--) {
@@ -66,16 +60,14 @@ class Slots {
                     value = v;
                 }
             }
-
             let imValue = fromJS(value);
             let result = this.state.mergeDeepIn(path, imValue);
-
             const applyRules = (path = new List(), value = {}) => {
                 if (!Map.isMap(value)) {
                     return;
                 }
                 let rule = this.rules.get(path.toArray().join("."));
-                if (Object.prototype.toString.call(rule) === "[object Function]") {
+                if (isFunction(rule)) {
                     result = result.merge(
                         rule(
                             result.getIn(path).toJS(), this.getContext()));
@@ -83,7 +75,6 @@ class Slots {
                 value.flip().toList().map((k) => applyRules(path.push(k), value.get(k)));
             };
             applyRules(new List(path), result);
-
             let newState = result;
             if (optimistic && !is(this.state, newState)) {
                 if (save) {
@@ -98,29 +89,8 @@ class Slots {
         }
     }
 
-    getRule(path) {
-        path = Slots.path(path);
-        return this.rules[path.join(".")];
-    }
-
-    reset() {
-        this.state = fromJS({});
-        this.promises = [];
-        this.onChangeListeners = [];
-        this.onPromisesAreMadeListeners = [];
-        this.onPromiseErrorListeners = [];
-    }
-
-    onChange(fn) {
-        this.onChangeListeners.push(fn);
-    }
-
-    onPromisesAreMade(fn) {
-        this.onPromisesAreMadeListeners.push(fn);
-    }
-
-    onPromiseError(fn) {
-        this.onPromiseErrorListeners.push(fn);
+    getState() {
+        return this.state.toJS();
     }
 
     get(path = null) {
@@ -136,16 +106,29 @@ class Slots {
         return this.rules.toJS();
     }
 
-    getState() {
-        return this.state.toJS();
-    }
-
     getContext() {
         return {
             set: (path, value) => {
                 return this.set(path, value, false, false);
             }
         }
+    }
+
+    getRule(path) {
+        path = Slots.path(path);
+        return this.rules[path.join(".")];
+    }
+
+    onChange(fn) {
+        this.onChangeListeners.push(fn);
+    }
+
+    onPromisesAreMade(fn) {
+        this.onPromisesAreMadeListeners.push(fn);
+    }
+
+    onPromiseError(fn) {
+        this.onPromiseErrorListeners.push(fn);
     }
 
     isEqual(state) {
