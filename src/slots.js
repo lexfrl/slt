@@ -5,6 +5,9 @@ function isFunction(v) {
 }
 
 class Slots {
+    /**
+     * @TODO: add transaction context. More features, performance tweak
+     */
     constructor(rules = {}, state = {}) {
         this.rules =
             Slots.validateRules(
@@ -30,8 +33,9 @@ class Slots {
         return this.set([], value);
     }
 
-    set(path = [], value = {}, optimistic = true, save = true) {
+    set(path = [], value = {}, state = null, optimistic = true, save = true) {
         path = Slots.path(path);
+        state = state || this.state;
         if (value && isFunction(value.then)) {
             this.promises.push(value);
             value.then((val) => {
@@ -46,7 +50,7 @@ class Slots {
                 })
                 .finally(() => {
                 });
-        } else {
+        }
             let i = path.length;
             let v = value;
             while (i--) {
@@ -60,16 +64,17 @@ class Slots {
                 }
             }
             let imValue = fromJS(value);
-            let result = this.state.mergeDeepIn(path, imValue);
+            let result = imValue.toJS ? state.mergeDeepIn(path, imValue)
+                : state.setIn(path, imValue);
             const applyRules = (path = new List(), value = {}) => {
                 if (!Map.isMap(value)) {
                     return;
                 }
                 let rule = this.rules.get(path.toArray().join("."));
                 if (isFunction(rule)) {
-                    result = result.merge(
-                        rule(
-                            result.getIn(path).toJS(), this.getContext()));
+                    let p = result.getIn(path);
+                    result = result.mergeDeep(
+                        rule(p && p.toJS && p.toJS() || p, this.getContext(result)));
                 }
                 value.flip().toList().map((k) => applyRules(path.push(k), value.get(k)));
             };
@@ -85,7 +90,6 @@ class Slots {
                 }
             }
             return result;
-        }
     }
 
     getState() {
@@ -105,10 +109,10 @@ class Slots {
         return this.rules.toJS();
     }
 
-    getContext() {
+    getContext(state) {
         return {
             set: (path, value) => {
-                return this.set(path, value, false, false);
+                return this.set(path, value, state,  false, false);
             }
         }
     }
