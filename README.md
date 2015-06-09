@@ -1,4 +1,4 @@
-## DESCLIMER
+## DISCLAIMER
 First sorry for bad language, I have really no time right now to make all perfect.
 I've developed this peace of software during implementation on own project, which was originally started using Flux. I realized that Flux adds a lot of unnecessary (not quite useful) entities and adds a lot of boilerplate to your codebase which is a reason of existence of many attempts to fix it (which is useless, because of design). Also I had no time to wait for Facebook Relay (http://facebook.github.io/react/blog/2015/02/20/introducing-relay-and-graphql.html) and I didn't want to bloat my codebase with knowingly out-of-date architecture. Now I glad to introduce my solution to app state managemet. It not dependend/related on any lib except https://facebook.github.io/immutable-js/ which is used for inner state management and not exposed to user (also I have a plan to make pure immutable version w/o any conversion). 
 
