@@ -24,7 +24,7 @@ Slots could be consider as a missing part of React (not only). It's like Flux, b
 On the server (express middleware):
 
 ```javascript
-import solver from "./slots"; // Configured Slots
+import slots from "./slots"; // Configured Slots
 server.use((req, res, next) => {
   slots.onPromisesAreMade((state) => {
     state = slots.getStateWithAliases();
@@ -44,8 +44,8 @@ require("babel/polyfill");
 
 import React from "react";
 import Application from "./Application.js";
-import solver from "./slots"; // Configured Slots
-solver.onChange((state) => {
+import slots from "./slots"; // Configured Slots
+slots.onChange((state) => {
     renderApp(state);
 })
 function renderApp(state) {
