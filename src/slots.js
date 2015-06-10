@@ -63,15 +63,15 @@ class Slots {
             let imValue = fromJS(value);
             let result = imValue.toJS ? state.mergeDeepIn(path, imValue)
                 : state.setIn(path, imValue);
-            const applyRules = (path = new List(), value = {}) => {
-                if (!Map.isMap(value)) {
-                    return;
-                }
+            const applyRules = (path = new List(), value = new Map()) => {
                 let rule = this.rules.get(path.toArray().join("."));
                 if (isFunction(rule)) {
                     let p = result.getIn(path);
                     result = result.mergeDeep(
                         rule(p && p.toJS && p.toJS() || p, this.getContext(result)));
+                }
+                if (!Map.isMap(value)) {
+                    return;
                 }
                 value.flip().toList().map((k) => applyRules(path.push(k), value.get(k)));
             };

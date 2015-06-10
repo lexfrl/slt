@@ -20,11 +20,26 @@ describe('Slots cascade', () => {
         expect(slots.get('users')).toBe(url2);
     });
 
+    it('should set w/o path', () => {
+        let url3 = "test3";
+        slots.set([], { request: url3 });
+        expect(slots.get('request')).toBe(url3);
+        expect(slots.get('users')).toBe(url3);
+    });
 
-    //it('should set state and execute rules on object', () => {
-    //    let url = {"test": "test"};
-    //    slots.set('request', url);
-    //    expect(slots.get('request')).toEqual(url);
-    //    expect(slots.get('users')).toEqual(url);
-    //});
+    it('should multi set w/o path', () => {
+        let url4 = "test4";
+        slots.set([], { request: url4, any: 3, another: { test: "test" } });
+        expect(slots.get('request')).toBe(url4);
+        expect(slots.get('users')).toBe(url4);
+        expect(slots.get('any')).toBe(3);
+        expect(slots.get('another')).toEqual({ test: "test" });
+    });
+
+    it('should overwrite by rule', () => {
+        let url5 = "test5";
+        slots.set([], { request: url5, users: 3 });
+        expect(slots.get('request')).toBe(url5);
+        expect(slots.get('users')).toBe(url5);
+    });
 });
