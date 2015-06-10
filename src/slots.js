@@ -5,9 +5,6 @@ function isFunction(v) {
 }
 
 class Slots {
-    /**
-     * @TODO: add transaction context. More features, performance tweak
-     */
     constructor(rules = {}, state = {}) {
         this.rules =
             Slots.validateRules(
