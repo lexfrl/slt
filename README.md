@@ -63,11 +63,12 @@ export default new Slots ({
     }
 });
 ```
+I use https://github.com/AlexeyFrolov/routr-map to parse url.
 ### Somewhere in .JSX (click on link, for example)
 ```javascript
 slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
 ```
-I use https://github.com/AlexeyFrolov/routr-map to parse url.
+Important to understand that all `context.set` running in single transaction within one "rule chain". It sets "all or nothing". If something breaks inside of `slots.set("request")` the state will be not changed.
 
 ###On server (express middleware)
 
