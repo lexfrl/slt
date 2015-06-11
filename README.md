@@ -110,3 +110,6 @@ GET /api//users/555e5c37a5311543fc8890c9 200 23.483 ms - -
   slt:log SET 'users.555e5c37a5311543fc8890c9' TO { _id: '555e5c37a5311543fc8890c9' } +1ms
   slt:log SAVE { request: [Object],  route: [Object], users: [Object], session: [object Object] } +76ms
 ```
+
+Final state (w/o 'user', I have different rules, which sets it as well)
+
