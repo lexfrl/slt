@@ -18,7 +18,7 @@ Slots could be consider as a missing part of React (not only). It's like Flux, b
 * pure immutable version w/o conversion fromJS and .toJS
 * more examples
 
-## Differences from Frux
+## Differences from Flux
 Honestly it's hard to compare Slots to Frux due to quite different approach. But people are asking.
 * in Slots there is no concept of Actions/ActionExecutors. It has rules to maintain consistency of the state. 
 * in Slots there is no multiple Stores. It holds data in the one immutable Map.
