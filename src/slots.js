@@ -81,7 +81,7 @@ class Slots {
                 let p = result.getIn(path);
                 d("Applying rule on path %s with value \n%s", insp(path), insp(p));
                 result = result.mergeDeep(
-                    rule(p && p.toJS && p.toJS() || p, this.getContext(result)));
+                    rule(p && p.toJS && p.toJS() || p, this.getContext(result)).getState());
                 d("Result is \n%s", insp(result));
             }
             if (!Map.isMap(value)) {
@@ -101,7 +101,7 @@ class Slots {
                 this.onChangeListeners.forEach(f => f(this.state.toJS()));
             }
         }
-        return result;
+        return this.getContext(result);
     }
 
     getState() {
@@ -125,6 +125,9 @@ class Slots {
         return {
             set: (path, value) => {
                 return this.set(path, value, state,  false, false);
+            },
+            getState: () => {
+                return state;
             }
         }
     }
