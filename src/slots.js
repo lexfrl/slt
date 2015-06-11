@@ -7,7 +7,8 @@ const log = debug("slt:log");
 function insp(value) {
     value = value.toJS ? value.toJS() : value;
     value = isArray(value) ? value.join(".") : value;
-    return util.inspect(value, {colors: true, depth: 0});
+    value = isFunction(value.then) ? "__promise__" : value;
+    return util.inspect(value, {colors: true, depth: 0}).replace('\n', '');
 }
 
 function isFunction(v) {
@@ -70,7 +71,7 @@ class Slots {
                 .finally(() => {
                 });
         }
-        log("Set %s to \n%s", insp(path), insp(value));
+        log("SET %s TO %s", insp(path), insp(value));
         let imValue = fromJS(value);
         let result = imValue.toJS ? state.mergeDeepIn(path, imValue)
             : state.setIn(path, imValue);
@@ -79,10 +80,10 @@ class Slots {
             let rule = this.rules.get(path.toArray().join("."));
             if (isFunction(rule)) {
                 let p = result.getIn(path);
-                d("Applying rule on path %s with value \n%s", insp(path), insp(p));
+                d("Applying rule on path %s with value %s", insp(path), insp(p));
                 result = result.mergeDeep(
                     rule(p && p.toJS && p.toJS() || p, this.getContext(result)).getState());
-                d("Result is \n%s", insp(result));
+                d("Result is %s", insp(result));
             }
             if (!Map.isMap(value)) {
                 return;
@@ -93,7 +94,7 @@ class Slots {
         let newState = result;
         if (optimistic && !is(this.state, newState)) {
             if (save) {
-                log("Save \n%s", insp(newState));
+                log("SAVE %s", insp(newState));
                 this.state = newState;
                 if (!this.promises.length) {
                     this.onPromisesAreMadeListeners.forEach(f => f(this.state.toJS()));
