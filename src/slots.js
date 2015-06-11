@@ -1,4 +1,6 @@
 import { fromJS, is, Map, List} from "immutable";
+import debug from "debug";
+const d = debug("slt");
 
 function isFunction(v) {
     return Object.prototype.toString.call(v) === "[object Function]";
@@ -33,12 +35,24 @@ class Slots {
     set(path = [], value = {}, state = null, optimistic = true, save = true) {
         path = Slots.path(path);
         state = state || this.state;
+        let i = path.length;
+        let v = value;
+        while (i--) {
+            let p = path.slice(0, i);
+            let tmp = {};
+            tmp[path.slice(i)] = v;
+            v = tmp;
+            if (this.rules.get(p.join("."))) {
+                path = p;
+                value = v;
+            }
+        }
         if (value && isFunction(value.then)) {
             this.promises.push(value);
             value.then((val) => {
-                    this.promises.splice(this.promises.indexOf(value), 1);
-                    this.set(path, val); // RECURSION with resolved value
-                })
+                this.promises.splice(this.promises.indexOf(value), 1);
+                this.set(path, val); // RECURSION with resolved value
+            })
                 .error((msg) => {
                     this.onPromiseErrorListeners.forEach(f => f(msg));
                 })
@@ -48,45 +62,34 @@ class Slots {
                 .finally(() => {
                 });
         }
-            let i = path.length;
-            let v = value;
-            while (i--) {
-                let p = path.slice(0, i);
-                let tmp = {};
-                tmp[path.slice(i)] = v;
-                v = tmp;
-                if (this.rules.get(p.join("."))) {
-                    path = p;
-                    value = v;
-                }
+        let imValue = fromJS(value);
+        let result = imValue.toJS ? state.mergeDeepIn(path, imValue)
+            : state.setIn(path, imValue);
+
+        const applyRules = (path = new List(), value = new Map()) => {
+            let rule = this.rules.get(path.toArray().join("."));
+            if (isFunction(rule)) {
+                let p = result.getIn(path);
+                result = result.mergeDeep(
+                    rule(p && p.toJS && p.toJS() || p, this.getContext(result)));
             }
-            let imValue = fromJS(value);
-            let result = imValue.toJS ? state.mergeDeepIn(path, imValue)
-                : state.setIn(path, imValue);
-            const applyRules = (path = new List(), value = new Map()) => {
-                let rule = this.rules.get(path.toArray().join("."));
-                if (isFunction(rule)) {
-                    let p = result.getIn(path);
-                    result = result.mergeDeep(
-                        rule(p && p.toJS && p.toJS() || p, this.getContext(result)));
-                }
-                if (!Map.isMap(value)) {
-                    return;
-                }
-                value.flip().toList().map((k) => applyRules(path.push(k), value.get(k)));
-            };
-            applyRules(new List(path), result);
-            let newState = result;
-            if (optimistic && !is(this.state, newState)) {
-                if (save) {
-                    this.state = newState;
-                    if (!this.promises.length) {
-                        this.onPromisesAreMadeListeners.forEach(f => f(this.state.toJS()));
-                    }
-                    this.onChangeListeners.forEach(f => f(this.state.toJS()));
-                }
+            if (!Map.isMap(value)) {
+                return;
             }
-            return result;
+            value.flip().toList().map((k) => applyRules(path.push(k), value.get(k)));
+        };
+        applyRules(new List(path), result);
+        let newState = result;
+        if (optimistic && !is(this.state, newState)) {
+            if (save) {
+                this.state = newState;
+                if (!this.promises.length) {
+                    this.onPromisesAreMadeListeners.forEach(f => f(this.state.toJS()));
+                }
+                this.onChangeListeners.forEach(f => f(this.state.toJS()));
+            }
+        }
+        return result;
     }
 
     getState() {
