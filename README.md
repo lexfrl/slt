@@ -35,25 +35,25 @@ import r from "superagent-bluebird-promise";
 import router from "./router";
 import Slots from "slt";
 
-const slots = new Slots ({
-    "request": (req, context) => {
+export default {
+    request (req, context)  {
         let route = router.match(req.url);
         let session = req.session;
         route.url = req.url;
         return context.set("route", route)
             .set("session", req.session);
     },
-    "route": (route, context) => {
+    route (route, context) {
         let {name, params: { id }} = route;
         if (name === "login") {
             return context;
         }
         let url = router.url({name, params: {id}});
         return context
-            .set(url.substr(1).replace("/", "."), r.get("http://example.com/api/" + url)
+            .set(url.substr(1).replace("/", "."), r.get("http://ggifster.ru/api/" + url)
             .then(({body}) => body))
     }
-});
+}
 ```
 
 ###On the server (express middleware):
