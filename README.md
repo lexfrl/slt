@@ -57,7 +57,7 @@ export default new Slots ({
         }
         let url = router.url({name, params: {id}});
         return context
-            .set(url.substr(1).replace("/", "."), r.get("http://ggifster.ru/api/" + url) // sets Promise which will fetch user for id.
+            .set(url.substr(1).replace("/", "."), r.get("http://example.com/api/" + url) // sets Promise which will fetch user for id.
             .then(({body}) => body)) // extract body from response
     }
 });
