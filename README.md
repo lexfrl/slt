@@ -7,7 +7,6 @@ Slots could be consider as a missing part of React (not only). It's like Flux, b
 
 ## TODO
 * connections: express middleware, React and others as separate libs
-* documentation (currently you can learn from tests, it's really self-descriptive)
 * add transaction context. Add rollbacks and state history navigation
 * add performance tests
 * add Promise interface support (e.g. Slots.then ect)
