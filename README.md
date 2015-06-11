@@ -47,8 +47,9 @@ export default new Slots ({
         let route = router.match(req.url);
         let session = req.session;
         route.url = req.url;
-        return context.set("route", route)
-            .set("session", req.session);
+        return context.set("route", route) // "route" rule will apply
+            .set("session", req.session); // there is no rule for "session". Just sets "session" to the state
+            // returns "context" which will be sent to the next rule in the chain ("route").
     },
     "route": (route, context) => {
         let {name, params: { id }} = route;
@@ -57,7 +58,7 @@ export default new Slots ({
         }
         let url = router.url({name, params: {id}});
         return context
-            .set(url.substr(1).replace("/", "."), r.get("http://ggifster.ru/api/" + url)
+            .set(url.substr(1).replace("/", "."), r.get("http://ggifster.ru/api/" + url) // sets Promise which will fetch user for id.
             .then(({body}) => body))
     }
 });
