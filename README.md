@@ -20,10 +20,22 @@ Slots could be consider as a missing part of React (not only). It's like Flux, b
 * pure immutable version w/o conversion fromJS and .toJS
 * more examples
 
-## USAGE (short man)
+## Differences from Frux
+Honestly it's hard to compare Slots to Frux due to quite different approach. But people are asking.
+* in Slots there is no concept of Actions/ActionExecutors. It has rules to maintain consistency of state. 
+* in Slots there is no multiple Stores. It holds data in the one immutable Map.
+* in Slots there is no waitFor.
+In short to understand Slots you need to know how works only one method: `set(path, value)`. This simplicity has a great value.
+
+## Philosophy 
+In each web app we can distinguish 2 types of state data: first is source (request) data and second is derivative (response) data. Derivative data (response and additional artefacts such as widgets/recommendations/comments to post ect.) dependends on request (HTTP or another type of request). The idea is to hold request data in the state and apply rule that will fetch data for that request. 
+
+##USAGE (short man)
+The idea is to describe rules which 
 
 ###Rules example
-I use https://github.com/AlexeyFrolov/routr-map to parse url.
+Rules is an object which is following the state structure. Say if you want to apply rule for some property in the state map (we call it Slot), you only need to declare function in the Rules object which key with the same state property name. (or path, e.g. it could be `"request.url": (url, context) {}`). Rule should return context. Context has the same `set` method.
+In example below we set "request" to the state, rule on key `request` sets active `route` and `session` (for session there is no rule) from request. When `route` state property is changed the `route` rule fires. It sets Promise to key `users.{id}`. When Promise will be resolved `users.{id}` will substituted with actual value of that Promise.
 
 ```javascript
 import r from "superagent-bluebird-promise";
@@ -54,6 +66,7 @@ export default new Slots ({
 ```javascript
 slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
 ```
+I use https://github.com/AlexeyFrolov/routr-map to parse url.
 
 ###On server (express middleware)
 
