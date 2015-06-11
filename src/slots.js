@@ -35,18 +35,10 @@ class Slots {
     set(path = [], value = {}, state = null, optimistic = true, save = true) {
         path = Slots.path(path);
         state = state || this.state;
-        let i = path.length;
-        let v = value;
-        while (i--) {
-            let p = path.slice(0, i);
-            let tmp = {};
-            tmp[path.slice(i)] = v;
-            v = tmp;
-            if (this.rules.get(p.join("."))) {
-                path = p;
-                value = v;
-            }
-        }
+        let reduced = this.reducePathAndValue(path, value);
+        path = reduced.path;
+        value = reduced.value;
+
         if (value && isFunction(value.then)) {
             this.promises.push(value);
             value.then((val) => {
@@ -115,6 +107,22 @@ class Slots {
                 return this.set(path, value, state,  false, false);
             }
         }
+    }
+
+    reducePathAndValue(path, value) {
+        let i = path.length;
+        let v = value;
+        while (i--) {
+            let p = path.slice(0, i);
+            let tmp = {};
+            tmp[path.slice(i)] = v;
+            v = tmp;
+            if (this.rules.get(p.join("."))) {
+                path = p;
+                value = v;
+            }
+        }
+        return { path, value }
     }
 
     getRule(path) {
