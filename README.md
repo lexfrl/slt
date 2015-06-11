@@ -106,6 +106,7 @@ renderApp(state);
 ```javascript
 window.debug = require("debug");
 window.debug.enable("slt:log");
+slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
 ```
 
 Outputs:
