@@ -25,6 +25,7 @@ Honestly it's hard to compare Slots to Frux due to quite different approach. But
 * in Slots there is no concept of Actions/ActionExecutors. It has rules to maintain consistency of the state. 
 * in Slots there is no multiple Stores. It holds data in the one immutable Map.
 * in Slots there is no waitFor.
+
 In short to understand Slots you need to know how works only one method: `set(path, value)`. This simplicity has a great value.
 
 ## Philosophy 
