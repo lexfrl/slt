@@ -8,7 +8,7 @@ function insp(value) {
     value = value.toJS ? value.toJS() : value;
     value = isArray(value) ? value.join(".") : value;
     value = isFunction(value.then) ? "__promise__" : value;
-    return util.inspect(value, {colors: true, depth: 0}).replace('\n', '');
+    return util.inspect(value, {colors: typeof window === "undefined", depth: 0}).replace('\n', '');
 }
 
 function isFunction(v) {
@@ -60,6 +60,7 @@ class Slots {
             this.promises.push(value);
             value.then((val) => {
                 this.promises.splice(this.promises.indexOf(value), 1);
+                log("RESOLVED %s", insp(path));
                 this.set(path, val); // RECURSION with resolved value
             })
                 .error((msg) => {
