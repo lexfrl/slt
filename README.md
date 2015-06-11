@@ -22,10 +22,9 @@ Slots could be consider as a missing part of React (not only). It's like Flux, b
 
 ## USAGE (short man)
 
-###Enable logging
+### Somewhere in .JSX (click on link, for example)
 ```javascript
-window.debug = require("debug");
-window.debug.enable("slt:log");
+slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
 ```
 
 ###Rules example:
@@ -91,9 +90,10 @@ function renderApp(state) {
 }
 renderApp(state);
 ```
-### Somewhere in .JSX (click on link, for example)
+###Enable logging
 ```javascript
-slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
+window.debug = require("debug");
+window.debug.enable("slt:log");
 ```
 
 Outputs:
