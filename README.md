@@ -56,7 +56,7 @@ export default new Slots ({
 });
 ```
 
-###On the server (express middleware):
+###On server (express middleware):
 
 ```javascript
 import slots from "./slots"; // Configured Slots
@@ -72,7 +72,7 @@ server.use((req, res, next) => {
 });
 ```
 
-###On the client:
+###On client:
 
 ```javascript
 require("babel/polyfill");
