@@ -110,7 +110,7 @@ slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
 ```
 
 Outputs:
-```
+```javascript
   slt:log SET 'request' TO { url: '/users/555e5c37a5311543fc8890c9',  session: [object Object] } +0ms
   slt:log SET 'route' TO { node: [Object],  params: [Object], routePath: [Object], query: {}, name: 'users', domain: '', scheme: '', url: '/users/555e5c37a5311543fc8890c9' } +4ms
   slt:log SET 'users.555e5c37a5311543fc8890c9' TO '__promise__' +5ms
