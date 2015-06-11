@@ -22,11 +22,6 @@ Slots could be consider as a missing part of React (not only). It's like Flux, b
 
 ## USAGE (short man)
 
-### Somewhere in .JSX (click on link, for example)
-```javascript
-slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
-```
-
 ###Rules example
 I use https://github.com/AlexeyFrolov/routr-map to parse url.
 
@@ -54,6 +49,10 @@ export default new Slots ({
             .then(({body}) => body))
     }
 });
+```
+### Somewhere in .JSX (click on link, for example)
+```javascript
+slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
 ```
 
 ###On server (express middleware)
