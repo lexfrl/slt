@@ -91,7 +91,7 @@ function renderApp(state) {
 }
 renderApp(state);
 ```
-
+### Somewhere in .JSX (click on link, for example)
 ```javascript
 slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
 ```
