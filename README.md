@@ -55,6 +55,7 @@ const slots = new Slots ({
             .then(({body}) => body))
     }
 });
+```
 
 ###On the server (express middleware):
 
@@ -91,6 +92,7 @@ function renderApp(state) {
 renderApp(state);
 ```
 
+```javascript
 slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
 ```
 
