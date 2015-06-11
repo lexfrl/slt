@@ -24,7 +24,7 @@ Honestly it's hard to compare Slots to Frux due to quite different approach. But
 * in Slots there is no multiple Stores. It holds data in the one immutable Map.
 * in Slots there is no waitFor.
 
-In short to understand Slots you need to know how works only one method: `set(path, value)`. This simplicity has a great value.
+In short to understand Slots you need to know how works only one method: `set(path, value)` (`path` is a dot-separated path to the concrete property in the state map). This simplicity has a great value.
 
 ## Philosophy
 In each web app we can distinguish 2 types of state data: first is source (request, session) data and second is derivative (response, artefacts) data. Derivative data (response and additional artefacts such as widgets/recommendations/comments to post ect.) dependends on request (HTTP or another type of request). The idea is to hold request data in the state and apply rule that will fetch data (derivative) for that request. 
