@@ -75,8 +75,7 @@ Important to understand that all `context.set` running in single transaction wit
 ```javascript
 import slots from "./slots"; // Configured Slots
 server.use((req, res, next) => {
-  slots.onPromisesAreMade((state) => {
-    state = slots.getStateWithAliases();
+  slots.onPromisesAreMade((state) => { // when all promises are resolved
     var html = render(state);
     res.status(state.response && state.response.status || 200).send(html);
     slots.reset();
@@ -89,18 +88,14 @@ server.use((req, res, next) => {
 ###On client
 
 ```javascript
-require("babel/polyfill");
-
 import React from "react";
 import Application from "./Application.js";
 import slots from "./slots"; // Configured Slots
-slots.onChange((state) => {
+slots.onChange((state) => { // on every commited change
     renderApp(state);
 })
 function renderApp(state) {
-    React.render(<Application state={state} />, document.getElementById("root"), () => {
-      debug("Application has been mounted");
-    });
+    React.render(<Application state={state} />, document.getElementById("root"));
 }
 renderApp(state);
 ```
