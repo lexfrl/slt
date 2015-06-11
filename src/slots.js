@@ -1,9 +1,25 @@
 import { fromJS, is, Map, List} from "immutable";
 import debug from "debug";
+import util from 'util';
 const d = debug("slt");
+const log = debug("slt:log");
+
+function insp(value) {
+    value = value.toJS ? value.toJS() : value;
+    value = isArray(value) ? value.join(".") : value;
+    return util.inspect(value, {colors: true, depth: 0});
+}
 
 function isFunction(v) {
     return Object.prototype.toString.call(v) === "[object Function]";
+}
+
+function isArray(v) {
+    return Object.prototype.toString.call(v) === "[object Array]";
+}
+
+function isString(v) {
+    return Object.prototype.toString.call(v) === "[object String]";
 }
 
 class Slots {
@@ -54,16 +70,19 @@ class Slots {
                 .finally(() => {
                 });
         }
+        log("Set %s to \n%s", insp(path), insp(value));
         let imValue = fromJS(value);
         let result = imValue.toJS ? state.mergeDeepIn(path, imValue)
             : state.setIn(path, imValue);
-
+        d("Merged \n%s", insp(result));
         const applyRules = (path = new List(), value = new Map()) => {
             let rule = this.rules.get(path.toArray().join("."));
             if (isFunction(rule)) {
                 let p = result.getIn(path);
+                d("Applying rule on path %s with value \n%s", insp(path), insp(p));
                 result = result.mergeDeep(
                     rule(p && p.toJS && p.toJS() || p, this.getContext(result)));
+                d("Result is \n%s", insp(result));
             }
             if (!Map.isMap(value)) {
                 return;
@@ -74,6 +93,7 @@ class Slots {
         let newState = result;
         if (optimistic && !is(this.state, newState)) {
             if (save) {
+                log("New state is \n%s", insp(newState));
                 this.state = newState;
                 if (!this.promises.length) {
                     this.onPromisesAreMadeListeners.forEach(f => f(this.state.toJS()));
@@ -158,8 +178,7 @@ class Slots {
         if (path === null) {
             return null;
         }
-        return  Object.prototype.toString.call(path) === "[object Array]" && path ||
-                Object.prototype.toString.call(path) === "[object String]" && path.split('.') ||
+        return  isArray(path) && path || isString(path) && path.split('.') ||
                 (() => { throw new Error (
                     `path should be an array or dot-separated string or null,
                     ` + Object.prototype.toString.call(path) + ` given`) } )()
