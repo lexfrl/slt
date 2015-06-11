@@ -28,11 +28,8 @@ Honestly it's hard to compare Slots to Frux due to quite different approach. But
 
 In short to understand Slots you need to know how works only one method: `set(path, value)`. This simplicity has a great value.
 
-## Philosophy 
+## Philosophy
 In each web app we can distinguish 2 types of state data: first is source (request) data and second is derivative (response) data. Derivative data (response and additional artefacts such as widgets/recommendations/comments to post ect.) dependends on request (HTTP or another type of request). The idea is to hold request data in the state and apply rule that will fetch data for that request. 
-
-##USAGE (short man)
-The idea is to describe rules which 
 
 ###Rules example
 Rules is an object which is following the state structure. Say if you want to apply rule for some property in the state map (we call it Slot), you only need to declare function in the Rules object which key with the same state property name. (or path, e.g. it could be `"request.url": (url, context) {}`). Rule should return context. Context has the same `set` method.
