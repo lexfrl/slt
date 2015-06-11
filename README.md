@@ -53,12 +53,12 @@ export default new Slots ({
     "route": (route, context) => {
         let {name, params: { id }} = route;
         if (name === "login") {
-            return context;
+            return context; // do nothing
         }
         let url = router.url({name, params: {id}});
         return context
             .set(url.substr(1).replace("/", "."), r.get("http://ggifster.ru/api/" + url) // sets Promise which will fetch user for id.
-            .then(({body}) => body))
+            .then(({body}) => body)) // extract body from response
     }
 });
 ```
