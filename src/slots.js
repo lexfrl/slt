@@ -93,7 +93,7 @@ class Slots {
         let newState = result;
         if (optimistic && !is(this.state, newState)) {
             if (save) {
-                log("New state is \n%s", insp(newState));
+                log("Save \n%s", insp(newState));
                 this.state = newState;
                 if (!this.promises.length) {
                     this.onPromisesAreMadeListeners.forEach(f => f(this.state.toJS()));
