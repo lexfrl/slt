@@ -35,7 +35,7 @@ import r from "superagent-bluebird-promise";
 import router from "./router";
 import Slots from "slt";
 
-export default {
+export default new Slots ({
     request (req, context)  {
         let route = router.match(req.url);
         let session = req.session;
@@ -53,7 +53,7 @@ export default {
             .set(url.substr(1).replace("/", "."), r.get("http://ggifster.ru/api/" + url)
             .then(({body}) => body))
     }
-}
+});
 ```
 
 ###On the server (express middleware):
