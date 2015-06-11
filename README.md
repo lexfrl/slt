@@ -104,7 +104,6 @@ Outputs:
   slt:log SET 'users.555e5c37a5311543fc8890c9' TO '__promise__' +5ms
   slt:log SET 'session' TO [object Object] +5ms
   slt:log SAVE { request: [Object],  route: [Object], users: [Object], session: [object Object] } +2ms
-  giftter Detected locale (from browser) is en +20ms
 GET /api//users/555e5c37a5311543fc8890c9 200 23.483 ms - -
   slt:log RESOLVED 'users.555e5c37a5311543fc8890c9' +31ms
   slt:log SET 'users.555e5c37a5311543fc8890c9' TO { _id: '555e5c37a5311543fc8890c9' } +1ms
