@@ -45,7 +45,8 @@ export default new Slots ({
         let route = router.match(req.url);
         let session = req.session;
         route.url = req.url;
-        return context.set("route", route) // "route" rule will apply
+        return context
+            .set("route", route) // "route" rule will apply
             .set("session", req.session); // there is no rule for "session". Just sets "session" to the state
             // returns "context" (with updated state) which will be sent to the next rule in the chain ("route").
     },
