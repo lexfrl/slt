@@ -36,14 +36,14 @@ import router from "./router";
 import Slots from "slt";
 
 export default new Slots ({
-    request (req, context)  {
+    "request": (req, context) => {
         let route = router.match(req.url);
         let session = req.session;
         route.url = req.url;
         return context.set("route", route)
             .set("session", req.session);
     },
-    route (route, context) {
+    "route": (route, context) => {
         let {name, params: { id }} = route;
         if (name === "login") {
             return context;
