@@ -27,7 +27,7 @@ Slots could be consider as a missing part of React (not only). It's like Flux, b
 slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
 ```
 
-###Rules example:
+###Rules example
 I use https://github.com/AlexeyFrolov/routr-map to parse url.
 
 ```javascript
@@ -56,7 +56,7 @@ export default new Slots ({
 });
 ```
 
-###On server (express middleware):
+###On server (express middleware)
 
 ```javascript
 import slots from "./slots"; // Configured Slots
@@ -72,7 +72,7 @@ server.use((req, res, next) => {
 });
 ```
 
-###On client:
+###On client
 
 ```javascript
 require("babel/polyfill");
