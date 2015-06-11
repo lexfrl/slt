@@ -21,7 +21,14 @@ Slots could be consider as a missing part of React (not only). It's like Flux, b
 * more examples
 
 ## USAGE (short man)
-On the server (express middleware):
+
+###Enable logging
+```javascript
+window.debug = require("debug");
+window.debug.enable("slt:log");
+```
+
+###On the server (express middleware):
 
 ```javascript
 import slots from "./slots"; // Configured Slots
@@ -37,7 +44,7 @@ server.use((req, res, next) => {
 });
 ```
 
-On the client:
+###On the client:
 
 ```javascript
 require("babel/polyfill");
@@ -54,4 +61,59 @@ function renderApp(state) {
     });
 }
 renderApp(state);
+```
+
+###Rules example:
+
+```javascript
+import r from "superagent-bluebird-promise";
+import router from "./router";
+import Slots from "slt";
+
+const slots = new Slots ({
+    "request": (req, context) => {
+        let route = router.match(req.url);
+        let session = req.session;
+        route.url = req.url;
+        return context.set("route", route)
+            .set("session", req.session);
+    },
+    "route": (route, context) => {
+        let {name, params: { id }} = route;
+        if (name === "login") {
+            return context;
+        }
+        let url = router.url({name, params: {id}});
+        return context
+            .set(url.substr(1).replace("/", "."), r.get("http://example.com/api/" + url)
+            .then(({body}) => body))
+    }
+});
+
+slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
+```
+
+Outputs:
+```
+  slt:log SET 'request' TO { url: '/users/555e5c37a5311543fc8890c9',  session: [object Object] } +0ms
+  slt:log SET 'route' TO { node: [Object],  params: [Object],
+  routePath: [Object],
+  query: {},
+  name: 'users',
+  domain: '',
+  scheme: '',
+  url: '/users/555e5c37a5311543fc8890c9' } +4ms
+  slt:log SET 'users.555e5c37a5311543fc8890c9' TO '__promise__' +5ms
+  slt:log SET 'session' TO [object Object] +5ms
+  slt:log SAVE { request: [Object],  route: [Object],
+  users: [Object],
+  session: [object Object] } +2ms
+  giftter Detected locale (from browser) is en +20ms
+GET /api//users/555e5c37a5311543fc8890c9 200 23.483 ms - -
+  slt:log RESOLVED 'users.555e5c37a5311543fc8890c9' +31ms
+  slt:log SET 'users.555e5c37a5311543fc8890c9' TO { _id: '555e5c37a5311543fc8890c9',  vkId: 10598,
+  vk: [Object] } +1ms
+  slt:log SAVE { request: [Object],  route: [Object],
+  users: [Object],
+  session: [object Object] } +76ms
 ```
