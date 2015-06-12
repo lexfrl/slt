@@ -16,6 +16,7 @@ Contributors are welcome! Write me to https://twitter.com/__fro
 * add support for groups of (sub)rules. Could be useful for sharing common rules
 * monitoring capabilities (for progress bars, for example) and better debugging
 * pure immutable version w/o conversion fromJS and .toJS
+* cache configuration
 * more examples
 
 ## Differences from Flux
