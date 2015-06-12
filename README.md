@@ -1,15 +1,15 @@
 ## DISCLAIMER
-I've developed this peace of software during implementation my own project, which was originally started with Flux. I realized that Flux adds a lot of unnecessary (not quite useful) entities and adds a lot of boilerplate to my codebase which is a reason why there is a lot of different implementations. Also I had no time to wait for Facebook Relay (http://facebook.github.io/react/blog/2015/02/20/introducing-relay-and-graphql.html) and I didn't want to bloat my codebase with knowingly out-of-date architecture. Now I glad to introduce my solution to app state managemet. It not dependend/related on any lib except https://facebook.github.io/immutable-js/ which is used for inner state management and not exposed to user (also I have a plan to make pure immutable version w/o any conversion). 
+I've developed this peace of software during implementation my own project, which was originally started with Flux. I realized that `Flux` adds a lot of unnecessary (not quite useful) entities and adds a lot of boilerplate to my codebase which is a reason why there is a lot of different implementations. Also I had no time to wait for Facebook Relay (http://facebook.github.io/react/blog/2015/02/20/introducing-relay-and-graphql.html) and I didn't want to bloat my codebase with knowingly out-of-date architecture. Now I glad to introduce my solution to app state managemet. It not dependend/related on any lib except https://facebook.github.io/immutable-js/ which is used for inner state management and not exposed to user (also I have a plan to make pure immutable version w/o any conversion). 
 Contributors are welcome! Write me to https://twitter.com/__fro
 
 ## DESCRIPTION
-Slots could be consider as a missing part of React (not only). It's like Flux, but better.
+`Slots` could be consider as a missing part of React (not only). It's like `Flux`, but better.
 
 ## TODO
 * connections: express middleware, React and others as separate libs
 * add transaction context. Add rollbacks and state history navigation
 * add performance tests
-* add Promise interface support (e.g. Slots.then ect)
+* add Promise interface support (e.g. `Slots.then` ect)
 * errors handling
 * async tests. More tests for Promises
 * rules which are dependent on state conditions (e.g. "apply rule IF")
@@ -19,18 +19,18 @@ Slots could be consider as a missing part of React (not only). It's like Flux, b
 * more examples
 
 ## Differences from Flux
-Honestly it's hard to compare Slots to Flux due to quite different approach. But people are asking.
-* in Slots there is no concept of Actions/ActionExecutors. It has rules to maintain consistency of the state. 
-* in Slots there is no multiple Stores. It holds data in the one immutable Map.
-* in Slots there is no waitFor.
+Honestly it's hard to compare `Slots` to `Flux` due to quite different approach. But people are asking.
+* in `Slots` there is no concept of Actions/ActionExecutors. It has rules to maintain consistency of the state. 
+* in `Slots` there is no multiple Stores. It holds data in the one immutable Map.
+* in `Slots` there is no waitFor.
 
-In short to understand Slots you need to know how works only one method: `set(path, value)` (`path` is a dot-separated path to the concrete property in the state map). This simplicity has a great value.
+In short to understand `Slots` you need to know how works only one method: `set(path, value)` (`path` is a dot-separated path to the concrete property in the state map). This simplicity has a great value.
 
 ## Philosophy
 In each web app we can distinguish 2 types of state data: first is source (request, session) data and second is derivative (response, artefacts) data. Derivative data (response and additional artefacts such as widgets/recommendations/comments to post ect.) dependends on request (HTTP or another type of request). The idea is to hold request data in the state and apply rule that will fetch data (derivative) for that request. 
 
 ## Use case
-React brought Virtual DOM (https://facebook.github.io/react/docs/glossary.html), in my projects I use Slots to virtualize browser state. And it gives me a great flexibility: I can use the same request data and the same rules in the same format both on client and server. Also it makes **super** easy to make **truly** isomorphic applications which could works w/o javascript on client **by default**.
+React brought Virtual DOM (https://facebook.github.io/react/docs/glossary.html), in my projects I use `Slots` to virtualize browser state. And it gives me a great flexibility: I can use the same request data and the same rules in the same format both on client and server. Also it makes **super** easy to make **truly** isomorphic applications which could works w/o javascript on client **by default**.
 
 ###Rules example
 Rules is an object which is following the state structure. Say if you want to apply rule for some property in the state map (we call it Slot), you only need to declare function in the Rules object which key with the same state property name. (or path, e.g. it could be `"request.url": (url, context) {}`). Rule should return context. Context has the same `set` method.
