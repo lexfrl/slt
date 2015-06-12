@@ -68,7 +68,7 @@ export default new Slots ({
     }
 });
 ```
-In short, following `<img>` analogy we say: if `request.url` is `/users/555e5c37a5311543fc8890c9` the `users.555e5c37a5311543fc8890c9` should be the body of GET request to `/users/555e5c37a5311543fc8890c9`. Also we  parse and validate route on the way.
+In short, following `<img>` analogy (https://github.com/AlexeyFrolov/slt/blob/master/README.md#philosophy) we say: if `request.url` is `/users/555e5c37a5311543fc8890c9` the `users.555e5c37a5311543fc8890c9` should be the body of GET request to `/users/555e5c37a5311543fc8890c9`. Also we  parse and validate route on the way.
 
 I use https://github.com/AlexeyFrolov/routr-map to parse url.
 ### Somewhere in .JSX (click on link, for example)
