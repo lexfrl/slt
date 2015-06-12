@@ -24,6 +24,7 @@ Honestly it's hard to compare `Slots` to `Flux` due to quite different approach.
 * in `Slots` there is no concept of Actions/ActionExecutors. It has rules to maintain consistency of the state. 
 * in `Slots` there is no multiple Stores. It holds data in the one immutable Map.
 * in `Slots` there is no waitFor.
+* `Slots` supports async operations trough Promises
 
 In short to understand `Slots` you need to know how works only one method: `set(path, value)` (`path` is a dot-separated path to the concrete property in the state map). This simplicity has a great value.
 
