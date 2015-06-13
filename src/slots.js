@@ -50,12 +50,8 @@ class Slots {
     }
 
     set(path = [], value = {}, state = null, optimistic = true, save = true) {
-        path = Slots.path(path);
         state = state || this.state;
-        let reduced = this.reducePathAndValue(path, value);
-        path = reduced.path;
-        value = reduced.value;
-
+        ({path, value} = this.reducePathAndValue(Slots.path(path), value));
         if (value && isFunction(value.then)) {
             this.promises.push(value);
             value.then((val) => {
