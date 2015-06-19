@@ -4,13 +4,6 @@ import util from 'util';
 const d = debug("slt");
 const log = debug("slt:log");
 
-function insp(value) {
-    value = value.toJS ? value.toJS() : value;
-    value = isArray(value) ? value.join(".") : value;
-    value = isFunction(value.then) ? "__promise__" : value;
-    return util.inspect(value, {colors: typeof window === "undefined", depth: 0}).replace('\n', '');
-}
-
 function isFunction(v) {
     return Object.prototype.toString.call(v) === "[object Function]";
 }
@@ -19,12 +12,23 @@ function isPromise(v) {
     return isFunction(v.then);
 }
 
+function isImmutable(v) {
+    return isFunction(v.toJS);
+}
+
 function isArray(v) {
     return Object.prototype.toString.call(v) === "[object Array]";
 }
 
 function isString(v) {
     return Object.prototype.toString.call(v) === "[object String]";
+}
+
+function insp(value) {
+    value = isImmutable(value) ? value.toJS() : value;
+    value = isArray(value) ? value.join(".") : value;
+    value = isFunction(value.then) ? "__promise__" : value;
+    return util.inspect(value, {colors: typeof window === "undefined", depth: 0}).replace('\n', '');
 }
 
 class Slots {
@@ -87,7 +91,7 @@ class Slots {
             if (isFunction(rule)) {
                 let val = result.getIn(path);
                 log("RULE on path %s with value %s", insp(path), insp(val));
-                let newContext = rule.call(this.getContext(result), val && val.toJS && val.toJS() || val);
+                let newContext = rule.call(this.getContext(result), val && isImmutable(val) && val.toJS() || val);
                 if (isPromise(newContext)) {
                     log("RETURNED PROMISE. BEGIN NEW CONTEXT");
                     newContext.bind(this.getContext(this.state)); // out of callstack (e.g. transaction context)
@@ -135,7 +139,7 @@ class Slots {
         }
         path = Slots.path(path);
         let value = state.getIn(path);
-        return value && value.toJS && value.toJS() || value;
+        return value && isImmutable(value) && value.toJS() || value;
     }
 
     getRules() {
