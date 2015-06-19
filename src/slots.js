@@ -81,20 +81,23 @@ class Slots {
         let imValue = fromJS(value);
         let result = imValue.toJS ? state.mergeDeepIn(path, imValue)
             : state.setIn(path, imValue);
-        d("Merged \n%s", insp(result));
+        d("MERGED \n%s", insp(result));
         const applyRules = (path = new List(), value = new Map()) => {
             let rule = this.rules.get(path.toArray().join("."));
             if (isFunction(rule)) {
                 let val = result.getIn(path);
-                d("Applying rule on path %s with value %s", insp(path), insp(val));
+                log("RULE on path %s with value %s", insp(path), insp(val));
                 let newContext = rule.call(this.getContext(result), val && val.toJS && val.toJS() || val);
                 if (isPromise(newContext)) {
-                    newContext.then((res) => {
-
-                    })
+                    log("RETURNED PROMISE. BEGIN NEW CONTEXT");
+                    newContext.bind(this.getContext(this.state)); // out of callstack (e.g. transaction context)
+                    newContext.then((data) => {
+                        doSave(data.getState());
+                    });
+                } else {
+                    result = result.mergeDeep(newContext.getState());
+                    d("RESULT is %s", insp(result));
                 }
-                result = result.mergeDeep(newContext.getState());
-                d("Result is %s", insp(result));
             }
             if (!Map.isMap(value)) {
                 return;
@@ -122,7 +125,7 @@ class Slots {
     }
 
     getState() {
-        return this.state.toJS();
+        return this.state;
     }
 
     get(path = null, state = null) {

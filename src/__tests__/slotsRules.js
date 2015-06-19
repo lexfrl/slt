@@ -18,7 +18,7 @@ describe ('Slots Rules', () => {
         expect(cb2).toHaveBeenCalled();
 
         const cb4 = jasmine.createSpy();
-        const slots4 = new Slots(rules, slots2.getState());
+        const slots4 = new Slots(rules, slots2.getState().toJS());
         slots4.onChange(cb4);
         slots4.set('route', {name: 'page', params: {id: 1}});
         expect(cb4).not.toHaveBeenCalled();

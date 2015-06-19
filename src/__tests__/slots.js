@@ -21,7 +21,7 @@ describe('Slots', () => {
         expect(slots.getRules()).toEqual(rules);
         expect(slots.getRules().route).toEqual(jasmine.any(Function));
 
-        expect(slots.getState()).toEqual(state);
+        expect(slots.getState().toJS()).toEqual(state);
     });
 
     it ('should set and get', () => {
@@ -40,9 +40,9 @@ describe('Slots', () => {
 
     const flox2 = new Slots({}, {});
     flox2.set('route', {name: 'page', params: {id: 1}});
-    const flox3 = new Slots({}, flox2.getState());
+    const flox3 = new Slots({}, flox2.getState().toJS());
     it ('should restore state', () => {
-        expect(flox3.getState()).toEqual(flox2.getState());
+        expect(flox3.getState().toJS()).toEqual(flox2.getState().toJS());
     });
 });
 
