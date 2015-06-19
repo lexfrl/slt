@@ -15,6 +15,10 @@ function isFunction(v) {
     return Object.prototype.toString.call(v) === "[object Function]";
 }
 
+function isPromise(v) {
+    return isFunction(v.then);
+}
+
 function isArray(v) {
     return Object.prototype.toString.call(v) === "[object Array]";
 }
@@ -50,15 +54,20 @@ class Slots {
     }
 
     set(path = [], value = {}, state = null, optimistic = true, save = true) {
+        var self = this;
         state = state || this.state;
         ({path, value} = this.reducePathAndValue(Slots.path(path), value));
-        if (value && isFunction(value.then)) {
+        if (value && isPromise(value)) {
             this.promises.push(value);
-            value.then((val) => {
+            value.then((data) => {
                 this.promises.splice(this.promises.indexOf(value), 1);
                 log("RESOLVED %s", insp(path));
-                this.set(path, val); // RECURSION with resolved value
-            })
+                if (isFunction(data.set)) {
+                    doSave(data.getState());
+                } else {
+                    this.set(path, data);
+                }
+                })
                 .error((msg) => {
                     this.onPromiseErrorListeners.forEach(f => f(msg));
                 })
@@ -76,10 +85,15 @@ class Slots {
         const applyRules = (path = new List(), value = new Map()) => {
             let rule = this.rules.get(path.toArray().join("."));
             if (isFunction(rule)) {
-                let p = result.getIn(path);
-                d("Applying rule on path %s with value %s", insp(path), insp(p));
-                result = result.mergeDeep(
-                    rule(p && p.toJS && p.toJS() || p, this.getContext(result)).getState());
+                let val = result.getIn(path);
+                d("Applying rule on path %s with value %s", insp(path), insp(val));
+                let newContext = rule.call(this.getContext(result), val && val.toJS && val.toJS() || val);
+                if (isPromise(newContext)) {
+                    newContext.then((res) => {
+
+                    })
+                }
+                result = result.mergeDeep(newContext.getState());
                 d("Result is %s", insp(result));
             }
             if (!Map.isMap(value)) {
@@ -89,14 +103,19 @@ class Slots {
         };
         applyRules(new List(path), result);
         let newState = result;
-        if (optimistic && !is(this.state, newState)) {
-            if (save) {
-                log("SAVE %s", insp(newState));
-                this.state = newState;
-                if (!this.promises.length) {
-                    this.onPromisesAreMadeListeners.forEach(f => f(this.state.toJS()));
+        doSave (newState);
+
+        function doSave (newState) {
+            if (optimistic && !is(self.state, newState)) {
+                if (save) {
+                    log("SAVE %s", insp(newState));
+                    self.state = newState;
+                    if (!self.promises.length) {
+                        self.onPromisesAreMadeListeners.forEach(f => f(self.state.toJS()));
+                    }
+                    self.onChangeListeners.forEach(f => f(self.state.toJS()));
+                    d("LISTENERS DONE %s", insp(newState));
                 }
-                this.onChangeListeners.forEach(f => f(this.state.toJS()));
             }
         }
         return this.getContext(result);
@@ -106,12 +125,13 @@ class Slots {
         return this.state.toJS();
     }
 
-    get(path = null) {
+    get(path = null, state = null) {
+        state = state || this.state;
         if (!path) {
-            return this.getState();
+            return state.toJS();
         }
         path = Slots.path(path);
-        let value = this.state.getIn(path);
+        let value = state.getIn(path);
         return value && value.toJS && value.toJS() || value;
     }
 
@@ -123,6 +143,9 @@ class Slots {
         return {
             set: (path, value) => {
                 return this.set(path, value, state,  false, false);
+            },
+            get: (path) => {
+                return this.get(path, state);
             },
             getState: () => {
                 return state;

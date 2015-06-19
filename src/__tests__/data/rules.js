@@ -1,8 +1,8 @@
 import service from "./service"
 
 export default {
-    "route": ({name, params }, context = null) => {
+    "route": function ({name, params }) {
         params = params || {id: 1};
-        return context.set(name, service[name](params.id));
+        return this.set(name, service[name](params.id));
     }
 }

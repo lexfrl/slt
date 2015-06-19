@@ -1,8 +1,8 @@
 export default {
-    "request": (url, context) => {
-        return context.set("route", url);
+    "request": function (url) {
+        return this.set("route", url);
     },
-    "route": (url, context) => {
-        return context.set("users", url);
+    "route": function (url) {
+        return this.set("users", url);
     }
 }
