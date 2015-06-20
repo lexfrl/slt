@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/__tests__/data/aliases.js"],"names":[],"mappings":";;;;;qBAAe;AACX,UAAM,EAAE,gBAAM;AACV,kBAAK,GAAG,CAAC,OAAO,CAAC,CAAA;KACpB;CACJ","file":"aliases.js","sourcesContent":["export default {\n    \"user\": () => {\n        this.get(\"users\")\n    }\n}"]}

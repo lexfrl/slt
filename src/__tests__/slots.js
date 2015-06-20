@@ -26,8 +26,7 @@ describe('Slots', () => {
 
     it ('should set and get', () => {
         let path = ["s", "b"];
-        let newState = [4];
-        slots.set(path, newState);
+        slots.set(path, [4]).commit();
         expect(slots.get(path)).toEqual([4,2,3]);
         expect(slots.get(path.join('.'))).toEqual([4,2,3]);
         expect(slots.get()).toEqual({
@@ -39,7 +38,7 @@ describe('Slots', () => {
     });
 
     const flox2 = new Slots({}, {});
-    flox2.set('route', {name: 'page', params: {id: 1}});
+    flox2.set('route', {name: 'page', params: {id: 1}}).commit();
     const flox3 = new Slots({}, flox2.getState().toJS());
     it ('should restore state', () => {
         expect(flox3.getState().toJS()).toEqual(flox2.getState().toJS());
