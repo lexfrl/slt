@@ -39,7 +39,6 @@ class Context {
         this.state = slots.state;
         this.initialState = slots.state;
         this.slots = slots;
-        this.get = slots.get.bind(this);
         this.branches = [];
         this.promises = [];
     }
@@ -57,6 +56,7 @@ class Context {
         let branch = new Branch(this.rules, this.state, this);
         this.branches.push(branch);
         this.state = branch.set(path, value).getState();
+        this.commit();
         return this;
     }
 
@@ -82,6 +82,18 @@ class Context {
                     ` + Object.prototype.toString.call(path) + ` given`) } )()
     }
 
+    get(path = null, state = null) {
+        state = state || this.state;
+        if (!path) {
+            return state.toJS();
+        }
+        path = Slots.path(path);
+        let value = state.getIn(path);
+        return value && isImmutable(value) && value.toJS() || value;
+    }
+
 }
+
+//Context.prototype.get = require("./slots").prototype.get;
 
 export default Context;

@@ -33,7 +33,7 @@ function insp(value) {
 }
 
 class Slots {
-    constructor(rules = {}, state = {}) {
+    constructor(rules = {}, state = {}, aliases = {}) {
         this.rules =
             Slots.validateRules(
                 Slots.normalizeRules(

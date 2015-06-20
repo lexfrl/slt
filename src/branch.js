@@ -41,7 +41,6 @@ class Branch {
         this.rules = rules;
         this.state = state;
         this.ctx = ctx;
-        this.get = ctx.get.bind(this);
         this.parent = parent;
         this.children = [];
         this.promises = [];
@@ -112,6 +111,16 @@ class Branch {
 
     getState() {
         return this.state;
+    }
+
+    get(path = null, state = null) {
+        state = state || this.state;
+        if (!path) {
+            return state.toJS();
+        }
+        path = Slots.path(path);
+        let value = state.getIn(path);
+        return value && isImmutable(value) && value.toJS() || value;
     }
 }
 
