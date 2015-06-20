@@ -1,6 +1,7 @@
 import { fromJS, is, Map, List} from "immutable";
 import debug from "debug";
-import util from 'util';
+import util from "util";
+import Context from "./context";
 const d = debug("slt");
 const log = debug("slt:log");
 
@@ -57,75 +58,23 @@ class Slots {
         return this.set([], value);
     }
 
-    set(path = [], value = {}, state = null, optimistic = true, save = true) {
-        var self = this;
-        state = state || this.state;
-        ({path, value} = this.reducePathAndValue(Slots.path(path), value));
-        if (value && isPromise(value)) {
-            this.promises.push(value);
-            value.then((data) => {
-                this.promises.splice(this.promises.indexOf(value), 1);
-                log("RESOLVED %s", insp(path));
-                if (isFunction(data.set)) {
-                    doSave(data.getState());
-                } else {
-                    this.set(path, data);
-                }
-                })
-                .error((msg) => {
-                    this.onPromiseErrorListeners.forEach(f => f(msg));
-                })
-                .catch((msg) => {
+    set(path = [], value = {}) {
+        let ctx = new Context(this);
+        return ctx.set(path, value);
+    }
 
-                })
-                .finally(() => {
-                });
+    commit (ctx) {
+        if (is(self.state, ctx.state)) {
+            return this;
         }
-        log("SET %s TO %s", insp(path), insp(value));
-        let imValue = fromJS(value);
-        let result = imValue.toJS ? state.mergeDeepIn(path, imValue)
-            : state.setIn(path, imValue);
-        d("MERGED \n%s", insp(result));
-        const applyRules = (path = new List(), value = new Map()) => {
-            let rule = this.rules.get(path.toArray().join("."));
-            if (isFunction(rule)) {
-                let val = result.getIn(path);
-                log("RULE on path %s with value %s", insp(path), insp(val));
-                let newContext = rule.call(this.getContext(result), val && isImmutable(val) && val.toJS() || val);
-                if (isPromise(newContext)) {
-                    log("RETURNED PROMISE. BEGIN A NEW CONTEXT");
-                    newContext.bind(this); // out of callstack (e.g. transaction context)
-                    newContext.then((data) => {
-                        doSave(data.getState());
-                    });
-                } else {
-                    result = result.mergeDeep(newContext.getState());
-                    d("RESULT is %s", insp(result));
-                }
-            }
-            if (!Map.isMap(value)) {
-                return;
-            }
-            value.flip().toList().map((k) => applyRules(path.push(k), value.get(k)));
-        };
-        applyRules(new List(path), result);
-        let newState = result;
-        doSave (newState);
-
-        function doSave (newState) {
-            if (optimistic && !is(self.state, newState)) {
-                if (save) {
-                    log("SAVE %s", insp(newState));
-                    self.state = newState;
-                    if (!self.promises.length) {
-                        self.onPromisesAreMadeListeners.forEach(f => f(self.state.toJS()));
-                    }
-                    self.onChangeListeners.forEach(f => f(self.state.toJS()));
-                    d("LISTENERS DONE %s", insp(newState));
-                }
-            }
+        log("SAVE %s", insp(ctx.state));
+        this.state = ctx.state;
+        if (!this.promises.length) {
+            this.onPromisesAreMadeListeners.forEach(f => f(this.state.toJS()));
         }
-        return this.getContext(result);
+        this.onChangeListeners.forEach(f => f(this.state.toJS()));
+        d("LISTENERS DONE %s", insp(ctx.state));
+        return ctx;
     }
 
     getState() {
