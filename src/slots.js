@@ -93,8 +93,8 @@ class Slots {
                 log("RULE on path %s with value %s", insp(path), insp(val));
                 let newContext = rule.call(this.getContext(result), val && isImmutable(val) && val.toJS() || val);
                 if (isPromise(newContext)) {
-                    log("RETURNED PROMISE. BEGIN NEW CONTEXT");
-                    newContext.bind(this.getContext(this.state)); // out of callstack (e.g. transaction context)
+                    log("RETURNED PROMISE. BEGIN A NEW CONTEXT");
+                    newContext.bind(this); // out of callstack (e.g. transaction context)
                     newContext.then((data) => {
                         doSave(data.getState());
                     });
