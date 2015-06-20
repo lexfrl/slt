@@ -40,6 +40,7 @@ class Slots {
                     fromJS(rules)));
 
         this.state = fromJS(state);
+        this.contexts = [];
         this.promises = [];
         this.onChangeListeners = [];
         this.onPromisesAreMadeListeners = [];
@@ -60,21 +61,30 @@ class Slots {
 
     set(path = [], value = {}) {
         let ctx = new Context(this);
+        this.contexts.push(ctx);
         return ctx.set(path, value);
     }
 
     commit (ctx) {
-        if (is(self.state, ctx.state)) {
+        if (is(this.state, ctx.state)) {
             return this;
         }
-        log("SAVE %s", insp(ctx.state));
+        log("COMMIT %s", insp(ctx.state));
         this.state = ctx.state;
         if (!this.promises.length) {
             this.onPromisesAreMadeListeners.forEach(f => f(this.state.toJS()));
         }
         this.onChangeListeners.forEach(f => f(this.state.toJS()));
-        d("LISTENERS DONE %s", insp(ctx.state));
+        d("LISTENERS DONE", insp(ctx.state));
         return ctx;
+    }
+
+    getContexts() {
+        return this.contexts;
+    }
+
+    toString() {
+
     }
 
     getState() {

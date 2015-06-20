@@ -2,6 +2,7 @@ import { fromJS, is, Map, List} from "immutable";
 import debug from "debug";
 import util from "util";
 import Branch from "./branch";
+import Slots from "./slots";
 const d = debug("slt");
 const log = debug("slt:log");
 
@@ -38,6 +39,8 @@ class Context {
         this.state = slots.state;
         this.initialState = slots.state;
         this.slots = slots;
+        this.get = slots.get.bind(this);
+        this.branches = [];
         this.promises = [];
     }
 
@@ -52,6 +55,7 @@ class Context {
 
     set(path = [], value = {}) {
         let branch = new Branch(this.rules, this.state, this);
+        this.branches.push(branch);
         this.state = branch.set(path, value).getState();
         return this;
     }

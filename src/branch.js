@@ -41,6 +41,7 @@ class Branch {
         this.rules = rules;
         this.state = state;
         this.ctx = ctx;
+        this.get = ctx.get.bind(this);
         this.parent = parent;
         this.children = [];
         this.promises = [];
@@ -74,17 +75,14 @@ class Branch {
                 let val = result.getIn(path);
                 log("RULE on path %s matched with value %s", insp(path), insp(val));
                 let branch = rule.call(this.newBranch(result), toJS(val));
-                //if (isPromise(newContext)) {
-                //    log("RETURNED PROMISE. BEGIN A NEW CONTEXT");
-                //    newContext.bind(this); // out of callstack (e.g. transaction context)
-                //    newContext.then((data) => {
-                //        doSave(data.getState());
-                //    });
-                //} else {
-                d("NEW BRANCH with state %s", insp(result));
-                result = branch.getState();
-                d("RESULT is %s", insp(result));
-                //}
+                if (isPromise(branch)) {
+                    log("PROMISE RETURNED");
+                    branch.bind(this.ctx); // out of call stack
+                } else {
+                    d("NEW BRANCH with state %s", insp(result));
+                    result = branch.getState();
+                    d("RESULT is %s", insp(result));
+                }
             }
             if (!Map.isMap(value)) {
                 return;
