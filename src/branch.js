@@ -1,40 +1,9 @@
 import { fromJS, is, Map, List} from "immutable";
 import debug from "debug";
-import util from 'util';
+import { toJS, isFunction, isPromise, insp } from "./utils";
 import Slots from "./slots";
 const d = debug("slt");
 const log = debug("slt:log");
-
-function isFunction(v) {
-    return Object.prototype.toString.call(v) === "[object Function]";
-}
-
-function isPromise(v) {
-    return isFunction(v.then);
-}
-
-function isImmutable(v) {
-    return isFunction(v.toJS);
-}
-
-function isArray(v) {
-    return Object.prototype.toString.call(v) === "[object Array]";
-}
-
-function isString(v) {
-    return Object.prototype.toString.call(v) === "[object String]";
-}
-
-function toJS(v) {
-    return v && isImmutable(v) && v.toJS() || v;
-}
-
-function insp(value) {
-    value = isImmutable(value) ? value.toJS() : value;
-    value = isArray(value) ? value.join(".") : value;
-    value = isFunction(value.then) ? "__promise__" : value;
-    return util.inspect(value, {colors: typeof window === "undefined", depth: 0}).replace('\n', '');
-}
 
 class Branch {
     constructor(rules, state, ctx, parent = null) {
@@ -120,7 +89,7 @@ class Branch {
         }
         path = Slots.path(path);
         let value = state.getIn(path);
-        return value && isImmutable(value) && value.toJS() || value;
+        return toJS(value);
     }
 }
 
