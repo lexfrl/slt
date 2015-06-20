@@ -26,7 +26,7 @@ function isString(v) {
 }
 
 function toJS(v) {
-    return val && isImmutable(val) && val.toJS() || val;
+    return v && isImmutable(v) && v.toJS() || v;
 }
 
 function insp(value) {
