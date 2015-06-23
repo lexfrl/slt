@@ -59,6 +59,7 @@ class Branch {
         };
         applyRules(new List(path), result);
         this.state = result;
+        this.ctx.slots._fireOnSet(this);
         return this;
     }
 

@@ -18,6 +18,8 @@ class Slots {
         this.onChangeListeners = [];
         this.onPromisesAreMadeListeners = [];
         this.onPromiseErrorListeners = [];
+        this.onSetListeners = [];
+        this.onCommitListeners = [];
     }
 
     reset() {
@@ -48,6 +50,7 @@ class Slots {
             this.onPromisesAreMadeListeners.forEach(f => f(this.state.toJS()));
         }
         this.onChangeListeners.forEach(f => f(this.state.toJS()));
+        this._fireOnCommit(ctx);
         d("LISTENERS DONE", insp(ctx.state));
         return ctx;
     }
@@ -115,6 +118,22 @@ class Slots {
 
     onChange(fn) {
         this.onChangeListeners.push(fn);
+    }
+
+    onSet(fn) {
+        this.onSetListeners.push(fn);
+    }
+
+    _fireOnSet(branch) {
+        this.onSetListeners.forEach(fn => fn(branch));
+    }
+
+    onCommit(fn) {
+        this.onCommitListeners.push(fn);
+    }
+
+    _fireOnCommit(context) {
+        this.onCommitListeners.forEach(fn => fn(context));
     }
 
     onPromisesAreMade(fn) {
