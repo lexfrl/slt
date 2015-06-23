@@ -3,7 +3,7 @@ I've developed this peace of software during implementation my own project, whic
 Contributors are welcome! Write me to https://twitter.com/__fro
 
 ## DESCRIPTION
-`Slots` could be consider as a missing part of React (not only). It's like `Flux`, but better.
+`Slots` could be considered as a missing part of React (not only). It's like `Flux`, but better.
 
 ## TODO
 * connections: express middleware, React and others as separate libs
@@ -31,7 +31,7 @@ In short to understand `Slots` you need to know how works only one method: `set(
 ## Philosophy
 In each web app we can distinguish 2 types of state data: first is source (request, session) data and second is derivative (response, artefacts) data. Derivative data (response and additional artefacts such as errors/widgets/recommendations/comments to post ect.) dependends on request (HTTP or another type of request). The idea is to hold request data in the state and apply rule that will fetch data (derivative) for that request. 
 
-A great analogy is an `<img>` or `<script>` in HTML. Browser loads specified img just because of existence of this tag in the DOM (request state). The logic here is: we have `<img>` tag inserted in DOM node and it has its `src` attribute then fetch actual image from server and put it inside this node. `Slots` follows the same idea, as you can see in example.
+A great analogy is an `<img>` or `<script>` in HTML. Browser loads specified img just because of existence of this tag in the DOM (request state). The logic here is: we have `<img>` tag inserted in DOM node and it has its `src` attribute then fetch actual image from server and put it inside this node. `Slots` follows the same idea, as you can see in the following example.
 
 ## Use case
 React had virtualized DOM (https://facebook.github.io/react/docs/glossary.html), in my projects I use `Slots` to virtualize (emulate) browser state and behavior (through Rules). And it gives me a great flexibility: I can use the same request data and the same rules in the same format both on client and server. Also it makes **super easy** to make **truly** isomorphic applications which could works w/o javascript on client **by default**. From this perspective, support of History API could be implemented as React component like so https://gist.github.com/AlexeyFrolov/0f7b44afc9fd29f36daf . 
