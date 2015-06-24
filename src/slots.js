@@ -37,14 +37,20 @@ class Slots {
     set(path = [], value = {}) {
         let ctx = new Context(this);
         this.contexts.push(ctx);
-        return ctx.set(path, value);
+        ctx.set(path, value);
+        return ctx;
     }
 
     commit (ctx) {
-        if (is(this.state, ctx.state)) {
-            return this;
+        if (!ctx.promises.length) {
+            log("NO PROMISES LEFT FOR CONTEXT %s", insp(ctx.path));
+            this.contexts.splice(this.contexts.indexOf(ctx), 1);
         }
         log("COMMIT %s", insp(ctx.state));
+        if (is(this.state, ctx.state)) {
+            log("NO STATE CHANGES IN CONTEXT %s", insp(ctx.path));
+            return this;
+        }
         this.state = ctx.state;
         if (!this.promises.length) {
             this.onPromisesAreMadeListeners.forEach(f => f(this.state.toJS()));
@@ -72,7 +78,7 @@ class Slots {
         if (!path) {
             return state.toJS();
         }
-        path = Slots.path(path);
+        path = Slots.makePath(path);
         let value = state.getIn(path);
         return toJS(value);
     }
@@ -112,7 +118,7 @@ class Slots {
     }
 
     getRule(path) {
-        path = Slots.path(path);
+        path = Slots.makePath(path);
         return this.rules[path.join(".")];
     }
 
@@ -156,7 +162,7 @@ class Slots {
         return rules;
     }
 
-    static path(path) {
+    static makePath(path) {
         if (path === null) {
             return null;
         }

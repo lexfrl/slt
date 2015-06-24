@@ -12,6 +12,7 @@ class Context {
         this.state = slots.state;
         this.initialState = slots.state;
         this.slots = slots;
+        this.path = [];
         this.branches = [];
         this.promises = [];
     }
@@ -26,10 +27,11 @@ class Context {
     }
 
     set(path = [], value = {}) {
+        this.path = path;
         let branch = new Branch(this.rules, this.state, this);
         this.branches.push(branch);
         this.state = branch.set(path, value).getState();
-        this.commit();
+        this.branches.splice(this.branches.indexOf(branch), 1);
         return this;
     }
 
@@ -45,7 +47,7 @@ class Context {
         return this.rules.toJS();
     }
 
-    static path(path) {
+    static makePath(path) {
         if (path === null) {
             return null;
         }
@@ -60,7 +62,7 @@ class Context {
         if (!path) {
             return state.toJS();
         }
-        path = Slots.path(path);
+        path = Slots.makePath(path);
         let value = state.getIn(path);
         return toJS(value);
     }

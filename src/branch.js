@@ -11,13 +11,13 @@ class Branch {
         this.state = state;
         this.ctx = ctx;
         this.parent = parent;
+        this.path = [];
+        this.value = null;
         this.children = [];
-        this.promises = [];
     }
 
     reset() {
         this.state = this.initialState;
-        this.promises = [];
     }
 
     newBranch(state) {
@@ -31,7 +31,9 @@ class Branch {
     }
 
     set(path = [], value = {}) {
-        ({path, value} = this.reducePathAndValue(Slots.path(path), value));
+        ({path, value} = this.reducePathAndValue(Slots.makePath(path), value));
+        this.path = path;
+        this.value = value;
         log("SET %s TO %s", insp(path), insp(value));
         let imValue = fromJS(value);
         let result = imValue.toJS ? this.state.mergeDeepIn(path, imValue)
@@ -46,6 +48,12 @@ class Branch {
                 if (isPromise(branch)) {
                     log("PROMISE RETURNED");
                     branch.bind(this.ctx); // out of call stack
+                    this.ctx.promises.push(branch);
+                    branch.then(() => {
+                        log("PROMISE FULFILLED for SET %s", insp(path));
+                        this.ctx.promises.splice(this.ctx.promises.indexOf(branch), 1);
+                        this.ctx.commit();
+                    });
                 } else {
                     d("NEW BRANCH with state %s", insp(result));
                     result = branch.getState();
@@ -88,7 +96,7 @@ class Branch {
         if (!path) {
             return state.toJS();
         }
-        path = Slots.path(path);
+        path = Slots.makePath(path);
         let value = state.getIn(path);
         return toJS(value);
     }

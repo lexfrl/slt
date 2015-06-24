@@ -1,6 +1,6 @@
 {
   "name": "slt",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Take care of your state",
   "main": "index.js",
   "scripts": {
