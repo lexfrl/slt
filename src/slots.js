@@ -57,7 +57,7 @@ class Slots {
         }
         this.onChangeListeners.forEach(f => f(this.state.toJS()));
         this._fireOnCommit(ctx);
-        d("LISTENERS DONE", insp(ctx.state));
+        log("LISTENERS DONE", insp(ctx.state));
         return ctx;
     }
 
