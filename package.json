@@ -1,6 +1,6 @@
 {
   "name": "slt",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "Take care of your state",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "author": "Alexey Frolov <frol.rage@gmail.com>",
   "license": "MIT",
-  "keywords": ["react", "flux", "relay", "state", "immutable"],
+  "keywords": ["react", "flux", "relay", "state", "immutable", "isomorphic", "promises"],
   "devDependencies": {
     "babel-jest": "^5.2.0",
     "jest-cli": "^0.4.5"
