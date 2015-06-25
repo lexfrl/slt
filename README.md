@@ -29,7 +29,7 @@ Honestly it's hard to compare `Slots` to `Flux` due to quite different approach.
 In short to understand `Slots` you need to know how works only one method: `set(path, value)` (`path` is a dot-separated path to the concrete property in the state map). This simplicity has a great value.
 
 ## Philosophy
-In each web app we can distinguish 2 types of state data: first is source (request, session) data and second is derivative (response, artefacts) data. Derivative data (response and additional artefacts such as errors/widgets/recommendations/comments to post ect.) dependends on request (HTTP or another type of request). The idea is to hold request data in the state and apply rule that will fetch data (derivative) for that request. 
+In each web app we can distinguish 2 types of state data: first is the source (request, session) data and second is derivative (response, artefacts) data. Derivative data (response and additional artefacts such as errors/widgets/recommendations/comments to post ect.) dependends on request (HTTP or another type of request). The idea is to hold request data in the state and apply rule that will fetch data (derivative) for that request. 
 
 A great analogy is an `<img>` or `<script>` in HTML. Browser loads specified img just because of existence of this tag in the DOM (request state). The logic here is: we have `<img>` tag inserted in DOM node and it has its `src` attribute then fetch actual image from server and put it inside this node. `Slots` follows the same idea, as you can see in the following example.
 
@@ -126,6 +126,6 @@ GET /api//users/555e5c37a5311543fc8890c9 200 23.483 ms - -
   slt:log SAVE { request: [Object],  route: [Object], users: [Object], session: [object Object] } +76ms
 ```
 
-Final state (w/o 'user', I have different rules, which sets it as well):
+Final state (w/o 'user', I have different rules, which set it as well):
 
 ![Alt text](https://monosnap.com/file/otw3slLjWwRCYqS12jQM4JXTB4kT2J.png)
