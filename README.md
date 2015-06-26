@@ -36,7 +36,7 @@ A great analogy is an `<img>` or `<script>` in HTML. Browser loads specified img
 ## Use case
 React had virtualized DOM (https://facebook.github.io/react/docs/glossary.html), in my projects I use `Slots` to virtualize (emulate) browser state and behavior (through Rules). And it gives me a great flexibility: I can use the same request data and the same rules in the same format both on client and server. Also it makes **super easy** to make **truly** isomorphic applications which could works w/o javascript on client **by default**. From this perspective, support of History API could be implemented as React component like so https://gist.github.com/AlexeyFrolov/0f7b44afc9fd29f36daf . 
 
-###Rules example
+###Rules example (v0.*)
 Rules is an object which is following the state structure. Say if you want to apply rule for some property in the state map (we call it Slot), you only need to declare function in the Rules object which key with the same state property name. (or path, e.g. it could be `"request.url": (url, context) {}`). Rule should return `context`. `context` has the same `set` method (which returns `context` with a new state).
 In example below we set "request" to the state, rule on key `request` sets active `route` and `session` (for session there is no rule) from request. When `route` state property is changed the `route` rule fires. It sets Promise to key `users.{id}`. When Promise will be resolved `users.{id}` will substituted with actual value of that Promise.
 
