@@ -52,7 +52,7 @@ class Branch {
                     branch.then(() => {
                         log("PROMISE FULFILLED for SET %s", insp(path));
                         this.ctx.promises.splice(this.ctx.promises.indexOf(branch), 1);
-                        this.ctx.commit();
+                        this.ctx.slots._checkPromises(this);
                     });
                 } else {
                     d("NEW BRANCH with state %s", insp(result));
@@ -67,7 +67,6 @@ class Branch {
         };
         applyRules(new List(path), result);
         this.state = result;
-        this.ctx.slots._fireOnSet(this);
         return this;
     }
 

@@ -11,7 +11,7 @@ describe ('Slots Rules', () => {
 
     const cb2 = jasmine.createSpy();
     const slots2 = new Slots(rules, {});
-    slots2.onChange(cb2);
+    slots2.onDidSet(cb2);
     it ('should call callback if state has changed', () => {
         slots2.set('route', {name: 'page', params: {id: 1}}).commit();
         expect(slots2.get('page.title')).toBe('Help');
@@ -19,9 +19,9 @@ describe ('Slots Rules', () => {
 
         const cb4 = jasmine.createSpy();
         const slots4 = new Slots(rules, slots2.getState().toJS());
-        slots4.onChange(cb4);
+        slots4.onDidSet(cb4);
         slots4.set('route', {name: 'page', params: {id: 1}}).commit();
-        expect(cb4).not.toHaveBeenCalled();
+        expect(cb4).toHaveBeenCalled();
     });
 
     const slots3 = new Slots(rules, {});

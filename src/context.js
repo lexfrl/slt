@@ -28,9 +28,14 @@ class Context {
 
     set(path = [], value = {}) {
         this.path = path;
+        let prevState = this.state;
         let branch = new Branch(this.rules, this.state, this);
         this.branches.push(branch);
-        this.state = branch.set(path, value).getState();
+        this.slots._fire("beforeSet", prevState, this);
+        let newState = branch.set(path, value).getState();
+        this.slots._fire("willSet", newState, this); //TODO: return false == do nothing
+        this.state = newState;
+        this.slots._fire("didSet", prevState, this);
         this.branches.splice(this.branches.indexOf(branch), 1);
         return this;
     }

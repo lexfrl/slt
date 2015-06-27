@@ -14,20 +14,12 @@ class Slots {
 
         this.state = fromJS(state);
         this.contexts = [];
-        this.promises = [];
-        this.onChangeListeners = [];
-        this.onPromisesAreMadeListeners = [];
-        this.onPromiseErrorListeners = [];
-        this.onSetListeners = [];
-        this.onCommitListeners = [];
+        this.listeners = {};
     }
 
     reset() {
         this.state = fromJS({});
-        this.promises = [];
-        this.onChangeListeners = [];
-        this.onPromisesAreMadeListeners = [];
-        this.onPromiseErrorListeners = [];
+        this.listeners = {};
     }
 
     setState(value) {
@@ -42,6 +34,8 @@ class Slots {
     }
 
     commit (ctx) {
+        let prevState = this.state;
+        this._fire("willCommit", ctx.state);
         if (!ctx.promises.length) {
             log("NO PROMISES LEFT FOR CONTEXT %s", insp(ctx.path));
             this.contexts.splice(this.contexts.indexOf(ctx), 1);
@@ -52,21 +46,60 @@ class Slots {
             return this;
         }
         this.state = ctx.state;
-        if (!this.promises.length) {
-            this.onPromisesAreMadeListeners.forEach(f => f(this.state.toJS()));
-        }
-        this.onChangeListeners.forEach(f => f(this.state.toJS()));
-        this._fireOnCommit(ctx);
+        this._fire("didCommit", prevState);
+        this._checkPromises();
         log("LISTENERS DONE", insp(ctx.state));
         return ctx;
     }
 
-    getContexts() {
-        return this.contexts;
+    on(eventName, fn) {
+        if (this.listeners[eventName] === undefined) {
+            this.listeners[eventName] = [];
+        }
+        if (this.listeners[eventName].filter(f => f.toString() === fn.toString()).length) {
+            return this.listeners[eventName].length;
+        }
+        return this.listeners[eventName].push(fn);
     }
 
-    toString() {
+    _fire(eventName, ...args) {
+        let listeners = this.listeners[eventName];
+        if (!listeners) {
+            return;
+        }
+        listeners.forEach(fn => fn.apply(this, args));
+    }
 
+    _checkPromises() {
+        if (this.contexts.filter((context) => context.promises.length).length) {
+            return;
+        }
+        this._fire("allPromisesDone");
+    }
+
+    onWillSet(fn) {
+        return this.on("willSet", fn);
+    }
+
+    onDidSet(fn) {
+        return this.on("didSet", fn);
+    }
+
+    onWillCommit(fn) {
+        return this.on("willCommit", fn);
+    }
+
+    onDidCommit(fn) {
+        return this.on("didCommit", fn);
+    }
+
+    onAllPromisesDone(fn) {
+        return this.on("allPromisesDone", fn);
+    }
+
+
+    getContexts() {
+        return this.contexts;
     }
 
     getState() {
@@ -87,67 +120,9 @@ class Slots {
         return this.rules.toJS();
     }
 
-    getContext(state) {
-        return {
-            set: (path, value) => {
-                return this.set(path, value, state,  false, false);
-            },
-            get: (path) => {
-                return this.get(path, state);
-            },
-            getState: () => {
-                return state;
-            }
-        }
-    }
-
-    reducePathAndValue(path, value) {
-        let i = path.length;
-        let v = value;
-        while (i--) {
-            let p = path.slice(0, i);
-            let tmp = {};
-            tmp[path.slice(i)] = v;
-            v = tmp;
-            if (this.rules.get(p.join("."))) {
-                path = p;
-                value = v;
-            }
-        }
-        return { path, value }
-    }
-
     getRule(path) {
         path = Slots.makePath(path);
         return this.rules[path.join(".")];
-    }
-
-    onChange(fn) {
-        this.onChangeListeners.push(fn);
-    }
-
-    onSet(fn) {
-        this.onSetListeners.push(fn);
-    }
-
-    _fireOnSet(branch) {
-        this.onSetListeners.forEach(fn => fn(branch));
-    }
-
-    onCommit(fn) {
-        this.onCommitListeners.push(fn);
-    }
-
-    _fireOnCommit(context) {
-        this.onCommitListeners.forEach(fn => fn(context));
-    }
-
-    onPromisesAreMade(fn) {
-        this.onPromisesAreMadeListeners.push(fn);
-    }
-
-    onPromiseError(fn) {
-        this.onPromiseErrorListeners.push(fn);
     }
 
     isEqual(state) {
