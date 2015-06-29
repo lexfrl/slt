@@ -42,4 +42,5 @@ describe('Slots cascade', () => {
         expect(slots.get('request')).toBe(url5);
         expect(slots.get('users')).toBe(url5);
     });
+    // deal with conflicts
 });

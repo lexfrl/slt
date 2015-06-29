@@ -35,17 +35,21 @@ class Branch {
         this.path = path;
         this.value = value;
         log("SET %s TO %s", insp(path), insp(value));
-        let imValue = fromJS(value);
-        let result = imValue.toJS ? this.state.mergeDeepIn(path, imValue)
-            : this.state.setIn(path, imValue);
-        d("MERGED \n%s", insp(result));
-        const applyRules = (path = new List(), value = new Map()) => {
+        let state = this.state;
+        d("MERGED \n%s", insp(state));
+        state = Branch.mergeValue(state, path, value); // TODO: deal with conflicts
+        const applyRules = (path = new List(), value = {}) => {
             let rule = this.rules.get(path.toArray().join("."));
             if (isFunction(rule)) {
-                let val = result.getIn(path);
-                log("RULE on path %s matched with value %s", insp(path), insp(val));
-                let branch = rule.call(this.newBranch(result), toJS(val));
-                if (isPromise(branch)) {
+                log("RULE on path %s matched with value %s", insp(path), insp(value));
+                let branch = this.newBranch(state);
+                rule.call(branch, value);
+                state = branch.state;
+                if (!isPromise(branch)) {
+                    d("NEW BRANCH with state %s", insp(state));
+                    state = branch.state;
+                    d("RESULT is %s", insp(state));
+                } else {
                     log("PROMISE RETURNED");
                     branch.bind(this.ctx); // out of call stack
                     this.ctx.promises.push(branch);
@@ -54,19 +58,16 @@ class Branch {
                         this.ctx.promises.splice(this.ctx.promises.indexOf(branch), 1);
                         this.ctx.slots._checkPromises(this);
                     });
-                } else {
-                    d("NEW BRANCH with state %s", insp(result));
-                    result = branch.getState();
-                    d("RESULT is %s", insp(result));
                 }
             }
-            if (!Map.isMap(value)) {
-                return;
+            else {
+                if (value !== null && typeof value === 'object') {
+                    Object.keys(value).forEach(k => applyRules(path.push(k), value[k]));
+                }
             }
-            value.flip().toList().map((k) => applyRules(path.push(k), value.get(k)));
         };
-        applyRules(new List(path), result);
-        this.state = result;
+        applyRules(new List(path), value);
+        this.state = state;
         return this;
     }
 
@@ -98,6 +99,11 @@ class Branch {
         path = Slots.makePath(path);
         let value = state.getIn(path);
         return toJS(value);
+    }
+
+    static mergeValue(state, path, value) {
+        return (value !== null && typeof value === 'object') ?
+            state.mergeDeepIn(path, value) : state.setIn(path, value);
     }
 }
 

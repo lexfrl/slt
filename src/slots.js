@@ -36,15 +36,7 @@ class Slots {
     commit (ctx) {
         let prevState = this.state;
         this._fire("willCommit", ctx.state);
-        if (!ctx.promises.length) {
-            log("NO PROMISES LEFT FOR CONTEXT %s", insp(ctx.path));
-            this.contexts.splice(this.contexts.indexOf(ctx), 1);
-        }
         log("COMMIT %s", insp(ctx.state));
-        if (is(this.state, ctx.state)) {
-            log("NO STATE CHANGES IN CONTEXT %s", insp(ctx.path));
-            return this;
-        }
         this.state = ctx.state;
         this._fire("didCommit", prevState);
         this._checkPromises();

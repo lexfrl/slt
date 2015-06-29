@@ -5,7 +5,7 @@ export function isFunction(v) {
 }
 
 export function isPromise(v) {
-    return isFunction(v.then);
+    return v && isFunction(v.then);
 }
 
 export function isImmutable(v) {

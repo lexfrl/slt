@@ -4,5 +4,9 @@ export default {
     },
     "route": function (url) {
         return this.set("users", url);
+    },
+    "users": function () {
+
     }
+
 }
