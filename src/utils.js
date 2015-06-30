@@ -4,6 +4,10 @@ export function isFunction(v) {
     return Object.prototype.toString.call(v) === "[object Function]";
 }
 
+export function isObject(v) {
+    return v !== null && typeof v === 'object';
+}
+
 export function isPromise(v) {
     return v && isFunction(v.then);
 }

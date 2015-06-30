@@ -1,6 +1,6 @@
 import { fromJS, is, Map, List} from "immutable";
 import debug from "debug";
-import { toJS, isFunction, isPromise, insp } from "./utils";
+import { toJS, isFunction, isPromise, insp, isObject } from "./utils";
 import Slots from "./slots";
 const d = debug("slt");
 const log = debug("slt:log");
@@ -61,7 +61,7 @@ class Branch {
                 }
             }
             else {
-                if (value !== null && typeof value === 'object') {
+                if (isObject(value)) {
                     Object.keys(value).forEach(k => applyRules(path.push(k), value[k]));
                 }
             }
@@ -102,7 +102,7 @@ class Branch {
     }
 
     static mergeValue(state, path, value) {
-        return (value !== null && typeof value === 'object') ?
+        return (isObject(value)) ?
             state.mergeDeepIn(path, value) : state.setIn(path, value);
     }
 }
