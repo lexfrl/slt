@@ -29,7 +29,7 @@ Honestly it's hard to compare `Slots` to `Flux` due to quite different approach.
 In short to understand `Slots` you need to know how works only one method: `set(path, value)` (`path` is a dot-separated path to the concrete property in the state map). This simplicity has a great value.
 
 ## Philosophy
-In each web app we can distinguish 2 types of state data: first is the source (request, session) data and second is derivative (response, artefacts) data. Derivative data (response and additional artefacts such as errors/widgets/recommendations/comments to post ect.) dependends on request (HTTP or another type of request). The idea is to hold request data in the state and apply rule that will fetch data (derivative) for that request. 
+In each web app we can distinguish 2 types of state data: first is the source (request, session) data and second is derivative (response, artefacts) data. Derivative data (response and additional artefacts such as errors/widgets/recommendations/comments to post ect.) dependends on request (HTTP or another type of request). The idea is to hold request data in the state and apply rule that will fetch data (derivative) for that request. **This approach makes you reach fully consistent app state - it holds all data you need and all the reasons why it should hold it at any point of time.**
 
 A great analogy is an `<img>` or `<script>` in HTML. Browser loads specified img just because of existence of this tag in the DOM (request state). The logic here is: we have `<img>` tag inserted in DOM node and it has its `src` attribute then fetch actual image from server and put it inside this node. `Slots` follows the same idea, as you can see in the following example.
 
