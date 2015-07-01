@@ -29,7 +29,7 @@ class Context {
     set(path = [], value = {}) {
         this.path = path;
         let prevState = this.state;
-        let branch = new Branch(this.rules, this.state, this);
+        let branch = new Branch(this.state, this.slots, this);
         this.branches.push(branch);
         this.slots._fire("beforeSet", prevState, this);
         let newState = branch.set(path, value).getState();

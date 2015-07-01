@@ -6,8 +6,8 @@ const d = debug("slt");
 const log = debug("slt:log");
 
 class Branch {
-    constructor(rules, state, ctx, parent = null) {
-        this.rules = rules;
+    constructor(state, slots, ctx, parent = null) {
+        this.slots = slots;
         this.state = state;
         this.ctx = ctx;
         this.parent = parent;
@@ -21,7 +21,7 @@ class Branch {
     }
 
     newBranch(state) {
-        let branch = new Branch(this.rules, state, this.ctx, this);
+        let branch = new Branch(state, this.slots, this.ctx, this);
         this.children.push(branch);
         return branch;
     }
@@ -39,8 +39,8 @@ class Branch {
         d("MERGED \n%s", insp(state));
         state = Branch.mergeValue(state, path, value); // TODO: deal with conflicts
         const applyRules = (path = new List(), value = {}) => {
-            let rule = this.rules.get(path.toArray().join("."));
-            if (isFunction(rule)) {
+            let rule = this.getSetRule(path);
+            if (rule) {
                 log("RULE on path %s matched with value %s", insp(path), insp(value));
                 let branch = this.newBranch(state);
                 rule.call(branch, value);
@@ -79,7 +79,7 @@ class Branch {
             let tmp = {};
             tmp[path.slice(i)] = v;
             v = tmp;
-            if (this.rules.get(p.join("."))) {
+            if (this.getRule(p)) {
                 path = p;
                 value = v;
             }
@@ -99,6 +99,18 @@ class Branch {
         path = Slots.makePath(path);
         let value = state.getIn(path);
         return toJS(value);
+    }
+
+    getRule(path) {
+        return this.slots.getRule(path);
+    }
+
+    getSetRule(path) {
+        return this.slots.getSetRule(path);
+    }
+
+    getDeps(path) {
+        return this.slots.getDeps(path);
     }
 
     static mergeValue(state, path, value) {
