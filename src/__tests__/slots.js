@@ -3,11 +3,10 @@ import Slots from "../slots";
 describe('Slots', () => {
     let slots;
     it ('should set Rules and State', () => {
-
+        let set = function  (route) {
+        };
         let rules = {
-            "route": (route) => {
-
-            }
+            "route": set
         };
 
         let state = {
@@ -18,8 +17,12 @@ describe('Slots', () => {
         };
 
         slots = new Slots(rules, state);
-        expect(slots.getRules()).toEqual(rules);
-        expect(slots.getRules().route).toEqual(jasmine.any(Function));
+        expect(slots.rules).toEqual( {
+            "route": {
+                set: set,
+                deps: []
+            }
+        });
 
         expect(slots.getState().toJS()).toEqual(state);
     });

@@ -7,11 +7,10 @@ const log = debug("slt:log");
 
 class Slots {
     constructor(rules = {}, state = {}, aliases = {}) {
-        this.rules =
-            Slots.validateRules(
-                Slots.normalizeRules(
-                    fromJS(rules)));
-
+        this.rules = Object.keys(rules).reduce((res, key) => {
+            res[key] = Slots.normalizeRule(rules[key]);
+            return res;
+        }, {});
         this.state = fromJS(state);
         this.contexts = [];
         this.listeners = {};
@@ -108,35 +107,57 @@ class Slots {
         return toJS(value);
     }
 
-    getRules() {
-        return this.rules.toJS();
-    }
-
     getRule(path) {
         path = Slots.makePath(path);
-        return this.rules[path.join(".")];
+        return this.rules[Slots.makeDottedPath(path)];
     }
+
+    getSetRule(path) {
+        let rule = this.getRule(path);
+        return rule && rule.set;
+    }
+
+    getDeps(path) {
+        let rule = this.getRule(path);
+        return rule && rule.deps;
+    }
+
 
     isEqual(state) {
         return is(fromJS(state), this.state);
     }
 
-    static normalizeRules(rule) {
+    static normalizeRule(rule) {
+        if (isFunction(rule)) {
+            let fn = rule;
+            rule = {
+                "set": fn
+            };
+        }
+        if (!rule.deps) {
+            rule.deps = [];
+        }
+        if (!isArray(rule.deps)) {
+            throw new Error("Invalid rule");
+        }
         return rule;
-    }
-
-    static validateRules (rules) {
-        return rules;
     }
 
     static makePath(path) {
         if (path === null) {
             return null;
         }
+        if (path.toArray) {
+            path = path.toArray();
+        }
         return  isArray(path) && path || isString(path) && path.split('.') ||
                 (() => { throw new Error (
                     `path should be an array or dot-separated string or null,
                     ` + Object.prototype.toString.call(path) + ` given`) } )()
+    }
+
+    static makeDottedPath(path) {
+        return Slots.makePath(path).join(".");
     }
 
 }
