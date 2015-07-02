@@ -1,6 +1,6 @@
 import { fromJS, is, Map, List} from "immutable";
 import debug from "debug";
-import { toJS, isArray, isString, isFunction, isPromise, insp } from "./utils";
+import { toJS, isArray, isString, isNumber, isFunction, isPromise, insp } from "./utils";
 import Context from "./context";
 const d = debug("slt");
 const log = debug("slt:log");
@@ -150,7 +150,7 @@ class Slots {
         if (path.toArray) {
             path = path.toArray();
         }
-        return  isArray(path) && path || isString(path) && path.split('.') ||
+        return  isArray(path) && path || (isString(path) || isNumber(path)) && path.toString().split('.') ||
                 (() => { throw new Error (
                     `path should be an array or dot-separated string or null,
                     ` + Object.prototype.toString.call(path) + ` given`) } )()

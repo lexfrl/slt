@@ -24,6 +24,10 @@ export function isString(v) {
     return Object.prototype.toString.call(v) === "[object String]";
 }
 
+export function isNumber(v) {
+    return Object.prototype.toString.call(v) === "[object Number]";
+}
+
 export function toJS(v) {
     return v && isImmutable(v) && v.toJS() || v;
 }

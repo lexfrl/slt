@@ -41,14 +41,23 @@ class Branch {
         const applyRules = (path = new List(), value = {}) => {
             let rule = this.getSetRule(path);
             if (rule) {
+                let deps = this.getDeps(path).map(dep => {
+                    let dependency = this.state.getIn(Slots.makePath(dep));
+                    if (!dependency) {
+                        throw new Error("Rule on `" + path.toArray().join(".") +
+                        "` requires `" + dep + "` state dependency which  not provided");
+                    }
+                    return dependency;
+                });
                 log("RULE on path %s matched with value %s", insp(path), insp(value));
                 let branch = this.newBranch(state);
-                rule.call(branch, value);
+                rule.apply(branch, [value, ...deps]);
                 state = branch.state;
                 if (!isPromise(branch)) {
                     d("NEW BRANCH with state %s", insp(state));
                     state = branch.state;
                     d("RESULT is %s", insp(state));
+                    this.state = state
                 } else {
                     log("PROMISE RETURNED");
                     branch.bind(this.ctx); // out of call stack
@@ -63,11 +72,12 @@ class Branch {
             else {
                 if (isObject(value)) {
                     Object.keys(value).forEach(k => applyRules(path.push(k), value[k]));
+                } else {
+                    this.state = state; // No rule found. Set as is.
                 }
             }
         };
         applyRules(new List(path), value);
-        this.state = state;
         return this;
     }
 
