@@ -42,7 +42,7 @@ React had virtualized DOM (https://facebook.github.io/react/docs/glossary.html),
 
 ###Rules example
 
-It's a complex real-world example that shows how to handle API redirects with a Location header.
+It's a complex real-world (my production code) example that shows how to handle API redirects with a Location header.
 
 ```javascript
 import r from "superagent-bluebird-promise";
