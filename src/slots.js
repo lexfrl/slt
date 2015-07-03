@@ -12,6 +12,7 @@ class Slots {
             return res;
         }, {});
         this.state = fromJS(state);
+        this.optimisticState = this.state;
         this.contexts = [];
         this.listeners = {};
     }
@@ -62,7 +63,7 @@ class Slots {
     }
 
     _checkPromises() {
-        if (this.contexts.filter((context) => context.promises.length).length) {
+        if (this.contexts.filter((context) => context.hasPromises()).length) {
             return;
         }
         this._fire("allPromisesDone");

@@ -31,11 +31,11 @@ describe ('Slots Rules', () => {
         expect(slots3.get('page.title')).toBe('Help');
     });
 
-    const slots5 = new Slots(rules, {});
-
-    it ('should set state and execute rules', () => {
-        slots5.set('route.name', 'page').commit();
-        expect(slots5.get('page.title')).toBe('Help');
-    });
+    //const slots5 = new Slots(rules, {});
+    //
+    //it ('should set state and execute rules', () => {
+    //    slots5.set('route.name', 'page').commit();
+    //    expect(slots5.get('page.title')).toBe('Help');
+    //});
 
 });

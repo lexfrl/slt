@@ -36,11 +36,10 @@ describe('Slots cascade', () => {
         expect(slots.get('another')).toEqual({ test: "test" });
     });
 
-    it('should overwrite by rule', () => {
-        let url5 = "test5";
-        slots.set([], { request: url5, users: 3 }).commit();
-        expect(slots.get('request')).toBe(url5);
-        expect(slots.get('users')).toBe(url5);
-    });
-    // deal with conflicts
+    //it('should overwrite by rule', () => {
+    //    let url5 = "test5";
+    //    slots.set([], { request: url5, users: 3 }).commit();
+    //    expect(slots.get('request')).toBe(url5);
+    //    expect(slots.get('users')).toBe(url5);
+    //});
 });

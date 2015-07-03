@@ -35,6 +35,7 @@ class Context {
         let newState = branch.set(path, value).getState();
         this.slots._fire("willSet", newState, this); //TODO: return false == do nothing
         this.state = newState;
+        this.slots.optimisticState.mergeDeep(newState);
         this.slots._fire("didSet", prevState, this);
         this.branches.splice(this.branches.indexOf(branch), 1);
         return this;
@@ -50,6 +51,10 @@ class Context {
 
     getRules() {
         return this.rules.toJS();
+    }
+
+    hasPromises() {
+        return !!this.promises.length;
     }
 
     static makePath(path) {

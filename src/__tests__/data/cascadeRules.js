@@ -1,9 +1,9 @@
 export default {
     "request": function (url) {
-        return this.set("route", url);
+        this.set("route", url);
     },
     "route": function (url) {
-        return this.set("users", url);
+        this.set("users", url);
     },
     "users": function () {
 

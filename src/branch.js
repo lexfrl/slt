@@ -31,53 +31,56 @@ class Branch {
     }
 
     set(path = [], value = {}) {
-        ({path, value} = this.reducePathAndValue(Slots.makePath(path), value));
+        //({path, value} = this.reducePathAndValue(Slots.makePath(path), value));
+        path = Slots.makePath(path);
         this.path = path;
         this.value = value;
         log("SET %s TO %s", insp(path), insp(value));
         let state = this.state;
         d("MERGED \n%s", insp(state));
-        state = Branch.mergeValue(state, path, value); // TODO: deal with conflicts
-        const applyRules = (path = new List(), value = {}) => {
-            let rule = this.getSetRule(path);
+        const applyRules = (_path = new List(), _value = {}) => {
+            let rule = this.getSetRule(_path);
             if (rule) {
-                let deps = this.getDeps(path).map(dep => {
-                    let dependency = this.state.getIn(Slots.makePath(dep));
-                    if (!dependency) {
-                        throw new Error("Rule on `" + path.toArray().join(".") +
-                        "` requires `" + dep + "` state dependency which  not provided");
+                let deps = this.getDeps(_path).map(dep => {
+                    let dependency = state.getIn(Slots.makePath(dep));
+                    if (typeof dependency === "undefined") {
+                        console.log(state);
+                        throw new Error("Rule on `" + _path.toArray().join(".") +
+                        "` requires `" + dep + "` state dependency");
                     }
                     return dependency;
                 });
-                log("RULE on path %s matched with value %s", insp(path), insp(value));
+                log("RULE on path %s matched with value %s", insp(_path), insp(_value));
+                state = Branch.mergeValue(state, _path, _value);
                 let branch = this.newBranch(state);
-                rule.apply(branch, [value, ...deps]);
+                let result = rule.apply(branch, [_value, ...deps]);
                 state = branch.state;
-                if (!isPromise(branch)) {
+                if (!isPromise(result)) {
                     d("NEW BRANCH with state %s", insp(state));
-                    state = branch.state;
+                    //result && this.set(_path, result);
                     d("RESULT is %s", insp(state));
-                    this.state = state
                 } else {
                     log("PROMISE RETURNED");
-                    branch.bind(this.ctx); // out of call stack
-                    this.ctx.promises.push(branch);
-                    branch.then(() => {
-                        log("PROMISE FULFILLED for SET %s", insp(path));
-                        this.ctx.promises.splice(this.ctx.promises.indexOf(branch), 1);
+                    result.bind(this.ctx); // out of call stack
+                    this.ctx.promises.push(result);
+                    result.then(() => {
+                        log("PROMISE FULFILLED for SET %s", insp(_path));
+                        this.ctx.promises.splice(this.ctx.promises.indexOf(result), 1);
                         this.ctx.slots._checkPromises(this);
                     });
                 }
             }
             else {
-                if (isObject(value)) {
-                    Object.keys(value).forEach(k => applyRules(path.push(k), value[k]));
-                } else {
-                    this.state = state; // No rule found. Set as is.
+                if (isObject(_value)) {
+                    Object.keys(_value).forEach(k => applyRules(_path.push(k), _value[k]));
+                } else { // No rule found for this `set`
+                    state = state.setIn(path, value);
+                    this.state = state;
                 }
             }
         };
         applyRules(new List(path), value);
+        this.state = state;
         return this;
     }
 
