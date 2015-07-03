@@ -30,7 +30,7 @@ class Branch {
         return this.set([], value);
     }
 
-    set(path = [], value = {}) {
+    set(path = [], value = {}, mergeValue = true) {
         //({path, value} = this.reducePathAndValue(Slots.makePath(path), value));
         path = Slots.makePath(path);
         this.path = path;
@@ -51,7 +51,7 @@ class Branch {
                     return dependency;
                 });
                 log("RULE on path %s matched with value %s", insp(_path), insp(_value));
-                state = Branch.mergeValue(state, _path, _value);
+                state = Branch.mergeValue(state, _path, _value, mergeValue);
                 let branch = this.newBranch(state);
                 let result = rule.apply(branch, [_value, ...deps]);
                 state = branch.state;
@@ -74,8 +74,7 @@ class Branch {
                 if (isObject(_value)) {
                     Object.keys(_value).forEach(k => applyRules(_path.push(k), _value[k]));
                 } else { // No rule found for this `set`
-                    state = state.setIn(path, value);
-                    this.state = state;
+                    state = Branch.mergeValue(state, path, value, mergeValue);
                 }
             }
         };
@@ -126,8 +125,8 @@ class Branch {
         return this.slots.getDeps(path);
     }
 
-    static mergeValue(state, path, value) {
-        return (isObject(value)) ?
+    static mergeValue(state, path, value, mergeValue) {
+        return (isObject(value) && mergeValue) ?
             state.mergeDeepIn(path, value) : state.setIn(path, value);
     }
 }

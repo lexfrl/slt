@@ -26,13 +26,13 @@ class Context {
         return this.set([], value);
     }
 
-    set(path = [], value = {}) {
+    set(path = [], value = {}, mergeValue = true) {
         this.path = path;
         let prevState = this.state;
         let branch = new Branch(this.state, this.slots, this);
         this.branches.push(branch);
         this.slots._fire("beforeSet", prevState, this);
-        let newState = branch.set(path, value).getState();
+        let newState = branch.set(path, value, mergeValue).getState();
         this.slots._fire("willSet", newState, this); //TODO: return false == do nothing
         this.state = newState;
         this.slots.optimisticState.mergeDeep(newState);

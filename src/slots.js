@@ -26,10 +26,10 @@ class Slots {
         return this.set([], value);
     }
 
-    set(path = [], value = {}) {
+    set(path = [], value = {}, mergeValue = true) {
         let ctx = new Context(this);
         this.contexts.push(ctx);
-        ctx.set(path, value);
+        ctx.set(path, value, mergeValue);
         return ctx;
     }
 
