@@ -54,7 +54,7 @@ export default {
         let session = req.session;
         route.url = req.url;
         return this
-            .set("route", route);
+            .set("route", route)
             .set("session", req.session);
     },
     "route": {
