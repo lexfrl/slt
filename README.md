@@ -52,7 +52,7 @@ export default {
         route.url = req.url;
         return this
             .set("route", route);
-            //.set("session", req.session);
+            .set("session", req.session);
     },
     "route": {
         deps: ["request"],
