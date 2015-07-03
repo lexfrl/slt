@@ -8,6 +8,7 @@ Contributors are welcome! Write me to https://twitter.com/__fro
 ## TODO
 * connections: express middleware, React and others as separate libs
 * add transaction context. Add rollbacks and state history navigation
+* add the master transaction context. Changes in other contexts sould be discarded if conflict occurs
 * add performance tests
 * add Promise interface support (e.g. `Slots.then` ect)
 * errors handling
@@ -25,6 +26,9 @@ Honestly it's hard to compare `Slots` to `Flux` due to quite different approach.
 * in `Slots` there is no multiple Stores. It holds data in the one immutable Map.
 * in `Slots` there is no waitFor.
 * `Slots` supports async operations through Promises
+* with `Slots` you are the master of your app state. Everything that's not commited will be discard.
+* you can choose beetween optimistic/pessimistic update
+* 
 
 In short to understand `Slots` you need to know how works only one method: `set(path, value)` (`path` is a dot-separated path to the concrete property in the state map). This simplicity has a great value.
 
@@ -34,39 +38,57 @@ In each web app we can distinguish 2 types of state data: first is the source (r
 A great analogy is an `<img>` or `<script>` in HTML. Browser loads specified img just because of existence of this tag in the DOM (request state). The logic here is: we have `<img>` tag inserted in DOM node and it has its `src` attribute then fetch actual image from server and put it inside this node. `Slots` follows the same idea, as you can see in the following example.
 
 ## Use case
-React had virtualized DOM (https://facebook.github.io/react/docs/glossary.html), in my projects I use `Slots` to virtualize (emulate) browser state and behavior (through Rules). And it gives me a great flexibility: I can use the same request data and the same rules in the same format both on client and server. Also it makes **super easy** to make **truly** isomorphic applications which could works w/o javascript on client **by default**. From this perspective, support of History API could be implemented as React component like so https://gist.github.com/AlexeyFrolov/0f7b44afc9fd29f36daf . 
+React had virtualized DOM (https://facebook.github.io/react/docs/glossary.html), in my projects I use `Slots` to virtualize (emulate) browser state and behavior (through Rules). And it gives me a great flexibility: I can use the same request data and the same rules in the same format both on client and server. Also it makes **super easy** to make **truly** isomorphic applications which could works w/o javascript on client **by default**. From this perspective, support of History API could be implemented as a React component like so https://gist.github.com/AlexeyFrolov/0f7b44afc9fd29f36daf . 
 
-###Rules example (v0.*)
-Rules is an object which is following the state structure. Say if you want to apply rule for some property in the state map (we call it Slot), you only need to declare function in the Rules object which key with the same state property name. (or path, e.g. it could be `"request.url": (url, context) {}`). Rule should return `context`. `context` has the same `set` method (which returns `context` with a new state).
-In example below we set "request" to the state, rule on key `request` sets active `route` and `session` (for session there is no rule) from request. When `route` state property is changed the `route` rule fires. It sets Promise to key `users.{id}`. When Promise will be resolved `users.{id}` will substituted with actual value of that Promise.
+###Rules example
+
+It's a complex real-world (my production code) example that shows how to handle API redirects with a Location header.
 
 ```javascript
 import r from "superagent-bluebird-promise";
 import router from "./router";
-import Slots from "slt";
 
-export default new Slots ({
-    "request": (req, context) => {
+export default {
+    "request": function (req)  {
         let route = router.match(req.url);
         let session = req.session;
         route.url = req.url;
-        return context
-            .set("route", route) // "route" rule will apply
-            .set("session", req.session); // there is no rule for "session". Just sets "session" to the state
-            // returns "context" (with updated state) which will be sent to the next rule in the chain ("route").
+        return this
+            .set("route", route);
+            .set("session", req.session);
     },
-    "route": (route, context) => {
-        let {name, params: { id }} = route;
-        if (name === "login") {
-            return context; // do nothing
+    "route": {
+        deps: ["request"],
+        set: function (route, request) {
+            let {name, params: { id }} = route;
+            if (name === "login") {
+                return this;
+            }
+            let url = router.url({name, params: {id}});
+            let method = request.method ? request.method.toLowerCase() : "get";
+            let req = r[method]("http://example.com/api/" + url);
+            if (~["post", "put"].indexOf(method)) {
+                req.send(request.body);
+            }
+            return req.then((resp) => {
+                let ctx = this.ctx;
+                let path = url.substr(1).replace("/", ".");
+                if (!resp.body) {
+                    let location = resp.headers.location;
+                    if (location) {
+                        ctx.set("request", {
+                            method: "GET",
+                            url: location.replace('/api', '')
+                        });
+                    }
+                } else {
+                    ctx.set(path, resp.body);
+                }
+                return ctx.commit();
+            });
         }
-        let url = router.url({name, params: {id}});
-        return context
-            .set(url.substr(1).replace("/", "."), // state key generated from url
-                r.get("http://example.com/api/" + url) // sets Promise which will fetch user for id.
-            .then(({body}) => body)) // extract body from response
     }
-});
+}
 ```
 In short, following `<img>` analogy (https://github.com/AlexeyFrolov/slt/blob/master/README.md#philosophy) we say: if `request.url` is `/users/555e5c37a5311543fc8890c9` the `users.555e5c37a5311543fc8890c9` should be the body of GET request to `/users/555e5c37a5311543fc8890c9`. Also we  parse and validate route on the way.
 
@@ -75,55 +97,54 @@ I use https://github.com/AlexeyFrolov/routr-map to parse url.
 ```javascript
 slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
 ```
-Important to understand that all `context.set` running in single transaction within one "rule chain". It sets "all or nothing". If something breaks inside of `slots.set("request")` the state will be not changed.
-
 ###On server (express middleware)
 
 ```javascript
-import slots from "./slots"; // Configured Slots
+import slots from ".lo/slots"; // Configured Slots
 server.use((req, res, next) => {
-  slots.onPromisesAreMade((state) => { // when all promises are resolved
-    var html = render(state);
+  slots.onAllPromisesDone(() => {
+    let state = slots.state.toJS();
+    let html = render(state);
     res.status(state.response && state.response.status || 200).send(html);
     slots.reset();
   });
   let { url, session } = req;
-  slots.set("request", { url, session });
+  slots.set("request", { url, session }).commit();
 });
+
 ```
 
 ###On client
 
 ```javascript
+
 import React from "react";
 import Application from "./Application.js";
-import slots from "./slots"; // Configured Slots
-slots.onChange((state) => { // on every commited change
-    renderApp(state);
-})
-function renderApp(state) {
-    React.render(<Application state={state} />, document.getElementById("root"));
-}
-renderApp(state);
-```
-###Enable logging
-```javascript
+import slots from "./slots";
+
+window.__SLOTS__DEBUG__ = slots;
 window.debug = require("debug");
 window.debug.enable("slt:log");
-slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
-```
 
-Outputs:
-```javascript
-  slt:log SET 'request' TO { url: '/users/555e5c37a5311543fc8890c9',  session: [object Object] } +0ms
-  slt:log SET 'route' TO { node: [Object],  params: [Object], routePath: [Object], query: {}, name: 'users', domain: '', scheme: '', url: '/users/555e5c37a5311543fc8890c9' } +4ms
-  slt:log SET 'users.555e5c37a5311543fc8890c9' TO '__promise__' +5ms
-  slt:log SET 'session' TO [object Object] +5ms
-  slt:log SAVE { request: [Object],  route: [Object], users: [Object], session: [object Object] } +2ms
-GET /api//users/555e5c37a5311543fc8890c9 200 23.483 ms - -
-  slt:log RESOLVED 'users.555e5c37a5311543fc8890c9' +31ms
-  slt:log SET 'users.555e5c37a5311543fc8890c9' TO { _id: '555e5c37a5311543fc8890c9' } +1ms
-  slt:log SAVE { request: [Object],  route: [Object], users: [Object], session: [object Object] } +76ms
+const mountNode = document.getElementById("root");
+const state = window.state;
+
+slots.onDidSet((prevState, context) => {
+    let state = context.state.toJS();
+    renderApp(state);
+})
+
+function renderApp(state) {
+
+    React.render(<Application state={state} />, mountNode, () => {
+      debug("Application has been mounted");
+    });
+}
+
+// Load the Intl polyfill and required locale data
+const locale = document.documentElement.getAttribute("lang");
+
+renderApp(state);
 ```
 
 Final state (w/o 'user', I have different rules, which set it as well):
