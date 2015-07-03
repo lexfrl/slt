@@ -45,7 +45,7 @@ import r from "superagent-bluebird-promise";
 import router from "./router";
 
 export default {
-    request (req)  {
+    "request": function (req)  {
         let route = router.match(req.url);
         let session = req.session;
         route.url = req.url;
@@ -53,34 +53,36 @@ export default {
             .set("route", route);
             //.set("session", req.session);
     },
-    route (route) {
-        let {name, params: { id }} = route;
-        if (name === "login") {
-            return this;
-        }
-        let url = router.url({name, params: {id}});
-        let request = this.get("request");
-        let method = request.method ? request.method.toLowerCase() : "get";
-        let req = r[method]("http://example.com/api/" + url);
-        if (~["post", "put"].indexOf(method)) {
-            req.send(request.body);
-        }
-        return req.then((resp) => {
-            let ctx = this.ctx;
-            let path = url.substr(1).replace("/", ".");
-            if (!resp.body) {
-                let location = resp.headers.location;
-                if (location) {
-                     ctx.set("request", {
-                        method: "GET",
-                        url: location.replace('/api', '')
-                    });
-                }
-            } else {
-                ctx.set(path, resp.body);
+    "route": {
+        deps: ["request"],
+        set: function (route, request) {
+            let {name, params: { id }} = route;
+            if (name === "login") {
+                return this;
             }
-            return ctx.commit();
-        });
+            let url = router.url({name, params: {id}});
+            let method = request.method ? request.method.toLowerCase() : "get";
+            let req = r[method]("http://example.com/api/" + url);
+            if (~["post", "put"].indexOf(method)) {
+                req.send(request.body);
+            }
+            return req.then((resp) => {
+                let ctx = this.ctx;
+                let path = url.substr(1).replace("/", ".");
+                if (!resp.body) {
+                    let location = resp.headers.location;
+                    if (location) {
+                        ctx.set("request", {
+                            method: "GET",
+                            url: location.replace('/api', '')
+                        });
+                    }
+                } else {
+                    ctx.set(path, resp.body);
+                }
+                return ctx.commit();
+            });
+        }
     }
 }
 ```
