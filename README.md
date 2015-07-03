@@ -8,6 +8,7 @@ Contributors are welcome! Write me to https://twitter.com/__fro
 ## TODO
 * connections: express middleware, React and others as separate libs
 * add transaction context. Add rollbacks and state history navigation
+* add the master transaction context. Changes in other contexts sould be discarded if conflict occurs
 * add performance tests
 * add Promise interface support (e.g. `Slots.then` ect)
 * errors handling
@@ -26,6 +27,8 @@ Honestly it's hard to compare `Slots` to `Flux` due to quite different approach.
 * in `Slots` there is no waitFor.
 * `Slots` supports async operations through Promises
 * with `Slots` you are the master of your app state. Everything that's not commited will be discard.
+* you can choose beetween optimistic/pessimistic update
+* 
 
 In short to understand `Slots` you need to know how works only one method: `set(path, value)` (`path` is a dot-separated path to the concrete property in the state map). This simplicity has a great value.
 
