@@ -128,7 +128,6 @@ const state = window.state;
 
 slots.onDidSet((prevState, context) => {
     let state = context.state.toJS();
-    window.st = state;
     renderApp(state);
 })
 
