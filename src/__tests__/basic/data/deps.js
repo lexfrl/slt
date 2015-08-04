@@ -6,7 +6,7 @@ export default {
         if (url == "Help") {
             route.params = {id: 1};
             route.name = "page";
-            return this.set("route", route);
+            this.set("route", route);
         }
     },
 

@@ -1,3 +1,4 @@
+import Promise from "core-js/es6/promise";
 import { fromJS, is, Map, List} from "immutable";
 import debug from "debug";
 import { toJS, isArray, isString, isNumber, isFunction, isPromise, insp } from "./utils";
@@ -6,7 +7,7 @@ const d = debug("slt");
 const log = debug("slt:log");
 
 class Slots {
-    constructor(rules = {}, state = {}, aliases = {}) {
+    constructor(rules = {}, state = {}, aliases = {}, promiseClass = null) {
         this.rules = Object.keys(rules).reduce((res, key) => {
             res[key] = Slots.normalizeRule(rules[key]);
             return res;
@@ -15,6 +16,7 @@ class Slots {
         this.optimisticState = this.state;
         this.contexts = [];
         this.listeners = {};
+        this.promiseClass = promiseClass || Promise || null;
     }
 
     reset() {
@@ -85,8 +87,24 @@ class Slots {
         return this.on("didCommit", fn);
     }
 
-    onAllPromisesDone(fn) {
-        return this.on("allPromisesDone", fn);
+    allDone(fn) {
+        return this.on("allDone", fn);
+    }
+
+    promise(promiseClass = null) {
+        promiseClass = promiseClass || this.promiseClass;
+        if (!promiseClass) {
+            throw new Error("Cant call .promise(). No promiseClass specified.");
+        }
+        return new promiseClass ((resolve, reject) => {
+            this.allDone((err, state) => {
+                if (err) {
+                    reject(new Error(err));
+                } else {
+                    resolve(state);
+                }
+            });
+        });
     }
 
 

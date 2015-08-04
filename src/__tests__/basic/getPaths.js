@@ -1,4 +1,4 @@
-import Slots from "../slots";
+import Slots from "../../slots";
 import rules from "./data/rulesPromise";
 import im from "immutable";
 

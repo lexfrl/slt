@@ -1,29 +1,24 @@
-'use strict';
+import Slots from "../../slots";
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var _slots = require('../slots');
-
-var _slots2 = _interopRequireDefault(_slots);
-
-describe('Slots', function () {
-    var slots = undefined;
-    it('should set Rules and State', function () {
-        var set = function set(route) {};
-        var rules = {
-            'route': set
+describe('Slots', () => {
+    let slots;
+    it ('should set Rules and State', () => {
+        let set = function  (route) {
+        };
+        let rules = {
+            "route": set
         };
 
-        var state = {
+        let state = {
             s: {
-                b: [1, 2, 3]
+                b: [1,2,3]
             },
             x: [0]
         };
 
-        slots = new _slots2['default'](rules, state);
-        expect(slots.rules).toEqual({
-            'route': {
+        slots = new Slots(rules, state);
+        expect(slots.rules).toEqual( {
+            "route": {
                 set: set,
                 deps: []
             }
@@ -32,10 +27,10 @@ describe('Slots', function () {
         expect(slots.getState().toJS()).toEqual(state);
     });
 
-    it('should set and get', function () {
-        var path = ['s', 'b'];
+    it ('should set and get', () => {
+        let path = ["s", "b"];
         slots.set(path, [4]).commit();
-        expect(slots.get(path)).toEqual([4, 2, 3]);
+        expect(slots.get(path)).toEqual([4,2,3]);
         //expect(slots.get(path.join('.'))).toEqual([4,2,3]);
         //expect(slots.get()).toEqual({
         //    s: {
@@ -52,4 +47,4 @@ describe('Slots', function () {
     //    expect(flox3.getState().toJS()).toEqual(flox2.getState().toJS());
     //});
 });
-//# sourceMappingURL=slots.js.map
+

@@ -32,12 +32,10 @@ class Context {
         let branch = new Branch(this.state, this.slots, this);
         this.branches.push(branch);
         this.slots._fire("beforeSet", prevState, this);
-        let newState = branch.set(path, value, mergeValue).getState();
+        let newState = branch.set(path, value, mergeValue).state;
         this.slots._fire("willSet", newState, this); //TODO: return false == do nothing
         this.state = newState;
-        this.slots.optimisticState.mergeDeep(newState);
         this.slots._fire("didSet", prevState, this);
-        this.branches.splice(this.branches.indexOf(branch), 1);
         return this;
     }
 
@@ -51,6 +49,10 @@ class Context {
 
     getRules() {
         return this.rules.toJS();
+    }
+
+    addPromise(promise) {
+        this.promises.push(promise);
     }
 
     hasPromises() {

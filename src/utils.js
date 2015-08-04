@@ -13,7 +13,7 @@ export function isPromise(v) {
 }
 
 export function isImmutable(v) {
-    return isFunction(v.toJS);
+    return v && isFunction(v.toJS);
 }
 
 export function isArray(v) {
@@ -35,6 +35,6 @@ export function toJS(v) {
 export function insp(value) {
     value = isImmutable(value) ? value.toJS() : value;
     value = isArray(value) ? value.join(".") : value;
-    value = isFunction(value.then) ? "__promise__" : value;
+    value = isPromise(value) ? "__promise__" : value;
     return util.inspect(value, {colors: typeof window === "undefined", depth: 0}).replace('\n', '');
 }

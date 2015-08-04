@@ -13,7 +13,7 @@ class Branch {
         this.parent = parent;
         this.path = [];
         this.value = null;
-        this.children = [];
+        this.locks = {};
     }
 
     reset() {
@@ -22,7 +22,6 @@ class Branch {
 
     newBranch(state) {
         let branch = new Branch(state, this.slots, this.ctx, this);
-        this.children.push(branch);
         return branch;
     }
 
@@ -35,6 +34,11 @@ class Branch {
         path = Slots.makePath(path);
         this.path = path;
         this.value = value;
+        this.findAsync(new List (path), value);
+        if (Object.keys(this.locks).length) {
+            this.resolveAsync();
+            return;
+        }
         log("SET %s TO %s", insp(path), insp(value));
         let state = this.state;
         d("MERGED \n%s", insp(state));
@@ -42,7 +46,7 @@ class Branch {
             let rule = this.getSetRule(_path);
             if (rule) {
                 let deps = this.getDeps(_path).map(dep => {
-                    let dependency = state.getIn(Slots.makePath(dep));
+                    let dependency = toJS(state.getIn(Slots.makePath(dep)));
                     if (typeof dependency === "undefined") {
                         console.log(state);
                         throw new Error("Rule on `" + _path.toArray().join(".") +
@@ -52,14 +56,12 @@ class Branch {
                 });
                 log("RULE on path %s matched with value %s", insp(_path), insp(_value));
                 state = Branch.mergeValue(state, _path, _value, mergeValue);
+                d("NEW BRANCH with state %s", insp(state));
                 let branch = this.newBranch(state);
                 let result = rule.apply(branch, [_value, ...deps]);
+                d("RESULT is %s", insp(result));
                 state = branch.state;
-                if (!isPromise(result)) {
-                    d("NEW BRANCH with state %s", insp(state));
-                    //result && this.set(_path, result);
-                    d("RESULT is %s", insp(state));
-                } else {
+                if (isPromise(result)) {
                     log("PROMISE RETURNED");
                     result.bind(this.ctx); // out of call stack
                     this.ctx.promises.push(result);
@@ -68,6 +70,8 @@ class Branch {
                         this.ctx.promises.splice(this.ctx.promises.indexOf(result), 1);
                         this.ctx.slots._checkPromises(this);
                     });
+                } else if (typeof result !== "undefined") {
+                    state = state.setIn(_path, result);
                 }
             }
             else {
@@ -82,6 +86,27 @@ class Branch {
         this.state = state;
         return this;
     }
+
+    resolveAsync() {
+        Object.keys(this.locks).forEach((key) => {
+            let lock = this.locks[key];
+            lock.promise.then((result) => {
+                this.set(lock.path, result);
+                delete this.locks[key];
+            })
+        });
+    }
+
+    findAsync(path, value) {
+        if (isPromise(value)) {
+            this.locks[path] = {path, promise: value};
+        }
+        else if (isObject(value)) {
+            Object.keys(value).forEach(k => this.findAsync(path.push(k), value[k]));
+        }
+    }
+
+
 
     reducePathAndValue(path, value) {
         let i = path.length;

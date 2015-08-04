@@ -1,4 +1,4 @@
-import Promise from "bluebird";
+import Promise from "core-js/es6/promise";
 
 export default {
     page(id) {

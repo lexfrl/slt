@@ -1,5 +1,5 @@
 import rules from "./data/cascadeRules";
-import Slots from "../slots";
+import Slots from "../../slots";
 
 const slots = new Slots(rules, {});
 
