@@ -68,7 +68,7 @@ class Slots {
         if (this.contexts.filter((context) => context.hasPromises()).length) {
             return;
         }
-        this._fire("allPromisesDone");
+        this._fire("allPromisesFulfilled");
     }
 
     onWillSet(fn) {
@@ -87,8 +87,8 @@ class Slots {
         return this.on("didCommit", fn);
     }
 
-    allDone(fn) {
-        return this.on("allDone", fn);
+    onAllPromisesFulfilled(fn) {
+        return this.on("allPromisesFulfilled", fn);
     }
 
     promise(promiseClass = null) {
