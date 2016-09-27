@@ -38,7 +38,7 @@ In each web app we can distinguish 2 types of state data: first is the source (r
 A great analogy is an `<img>` or `<script>` in HTML. Browser loads specified img just because of existence of this tag in the DOM (request state). The logic here is: we have `<img>` tag inserted in DOM node and it has its `src` attribute then fetch actual image from server and put it inside this node. `Slots` follows the same idea, as you can see in the following example.
 
 ## Use case
-React had virtualized DOM (https://facebook.github.io/react/docs/glossary.html), in my projects I use `Slots` to virtualize (emulate) browser state and behavior (through Rules). And it gives me a great flexibility: I can use the same request data and the same rules in the same format both on client and server. Also it makes **super easy** to make **truly** isomorphic applications which could works w/o javascript on client **by default**. From this perspective, support of History API could be implemented as a React component like so https://gist.github.com/AlexeyFrolov/0f7b44afc9fd29f36daf . 
+React had virtualized DOM (https://facebook.github.io/react/docs/glossary.html), in my projects I use `Slots` to virtualize (emulate) browser state and behavior (through Rules). And it gives me the great flexibility: I can use the same request data and the same rules in the same format both on client and server. Also it makes **super easy** to make **truly** isomorphic applications which could works w/o javascript on client **by default**. From this perspective, support of History API could be implemented as a React component like so https://gist.github.com/AlexeyFrolov/0f7b44afc9fd29f36daf . 
 
 ###Rules example
 
@@ -97,7 +97,7 @@ I use https://github.com/AlexeyFrolov/routr-map to parse url.
 ```javascript
 slots.set("request", {"url": "/users/555e5c37a5311543fc8890c9"})
 ```
-###On server (express middleware)
+###On the server (express middleware)
 
 ```javascript
 import slots from ".lo/slots"; // Configured Slots
@@ -114,7 +114,7 @@ server.use((req, res, next) => {
 
 ```
 
-###On client
+###On the client
 
 ```javascript
 
